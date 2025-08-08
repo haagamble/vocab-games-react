@@ -23,10 +23,15 @@ export default function Home() {
   // Load available word lists (mapping display names to file names)
   useEffect(() => {
     const wordLists: WordListOption[] = [
-      { display: 'Around Town', filename: 'around-town-vocab' },
+      { display: 'Adjectives', filename: 'adjectives' },
+      { display: 'Animals & Nature', filename: 'animals-and-nature' },
+      { display: 'Around Town', filename: 'around-town' },
       { display: 'First 100 Words', filename: 'first-100-words' },
-      { display: 'Friends & Family', filename: 'friends-and-family-vocab' },
-      { display: 'Spiritual Vocab', filename: 'spiritual-vocab' }
+      { display: 'Food & Drink', filename: 'food-and-drink' },
+      { display: 'Friends & Family', filename: 'friends-and-family' },
+      { display: 'Spiritual Vocab', filename: 'spiritual-vocab' },
+      { display: 'Verbs: Level 1', filename: 'verbs-1' },
+      { display: 'Verbs: Level 2', filename: 'verbs-2' },     
     ];
     setAvailableWordLists(wordLists);
   }, []);
