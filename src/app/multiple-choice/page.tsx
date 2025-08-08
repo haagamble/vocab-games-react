@@ -1,356 +1,395 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Shuffle, RotateCcw, Check, X, Trophy } from 'lucide-react';
-import vocabDataRaw from '../../../data/first-100-words.json' assert { type: 'json' };
+import Link from 'next/link';
+import { useWordList } from '../WordListContext';
+import { useEffect, useState } from 'react';
+import { loadWordList, generateMultipleChoiceOptions, shuffleArray, WordItem, WordList } from '../utils/wordListLoader';
 
+interface Question {
+  word: string;
+  definition: string;
+  options: string[];
+}
 
-// Define types
-type VocabPair = [string, string];
-type Mode = 'tajik-to-english' | 'english-to-tajik';
+type QuizMode = 'tajik-to-english' | 'english-to-tajik';
 
-// Type the imported data
-const vocabData = vocabDataRaw as VocabPair[];
-const TajikVocabApp: React.FC = () => {
-
-  const [currentQuestion, setCurrentQuestion] = useState<VocabPair | null>(null);
-  const [options, setOptions] = useState<VocabPair[]>([]);
-  const [selectedAnswer, setSelectedAnswer] = useState<VocabPair | null>(null);
-  const [showResult, setShowResult] = useState(false);
-  const [questionNumber, setQuestionNumber] = useState(1);
+export default function MultipleChoice() {
+  const { selectedWordList } = useWordList();
+  const [wordList, setWordList] = useState<WordList | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [score, setScore] = useState(0);
-  const [mode, setMode] = useState<Mode>('tajik-to-english');
-  const [quizComplete, setQuizComplete] = useState(false);
-  const [usedQuestions, setUsedQuestions] = useState<VocabPair[]>([]);
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showResult, setShowResult] = useState(false);
+  const [gameComplete, setGameComplete] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [quizMode, setQuizMode] = useState<QuizMode>('tajik-to-english'); // Default to Tajik→English
 
-  const generateQuestion = () => {
-    setSelectedAnswer(null);
-    setShowResult(false);
+  // Load word list data when component mounts or selectedWordList changes
+  useEffect(() => {
+    async function loadWordListData() {
+      if (!selectedWordList) {
+        setLoading(false);
+        return;
+      }
 
-    let availableQuestions = vocabData.filter(
-      item => !usedQuestions.some(used => used[0] === item[0])
-    );
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const data = await loadWordList(selectedWordList);
+        
+        if (!data) {
+          setError(`Failed to load word list: ${selectedWordList}`);
+          return;
+        }
 
-    if (availableQuestions.length === 0) {
-      availableQuestions = vocabData;
-      setUsedQuestions([]);
-    }
-
-    const randomIndex = Math.floor(Math.random() * availableQuestions.length);
-    const correctAnswer = availableQuestions[randomIndex];
-    setUsedQuestions(prev => [...prev, correctAnswer]);
-
-    const wrongOptions: VocabPair[] = [];
-    while (wrongOptions.length < 3) {
-      const randomWrong = vocabData[Math.floor(Math.random() * vocabData.length)];
-      if (
-        randomWrong[0] !== correctAnswer[0] &&
-        !wrongOptions.some(opt => opt[0] === randomWrong[0])
-      ) {
-        wrongOptions.push(randomWrong);
+        setWordList(data);
+        
+      } catch (err) {
+        setError(`Error loading word list: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      } finally {
+        setLoading(false);
       }
     }
 
-    const allOptions = [correctAnswer, ...wrongOptions].sort(() => Math.random() - 0.5);
-    setCurrentQuestion(correctAnswer);
-    setOptions(allOptions);
-  };
+    loadWordListData();
+  }, [selectedWordList]);
 
-  const handleAnswerSelect = (option: VocabPair) => {
-    if (showResult || !currentQuestion) return;
+  // Generate questions when word list or quiz mode changes
+  useEffect(() => {
+    if (!wordList || wordList.words.length === 0) {
+      return;
+    }
 
-    setSelectedAnswer(option);
+    // Generate questions from the word list
+    const shuffledWords = shuffleArray(wordList.words);
+    const gameQuestions = shuffledWords.slice(0, Math.min(10, wordList.words.length)).map(wordItem => {
+      let options: string[];
+      
+      if (quizMode === 'english-to-tajik') {
+        // English→Tajik mode: show English definition, choose from Tajik words
+        options = generateMultipleChoiceOptions(wordItem.word, wordList.words);
+      } else {
+        // Tajik→English mode: show Tajik word, choose from English words
+        const correctEnglishWord = wordItem.definition;
+        const wrongEnglishWords: string[] = [];
+        
+        // Get 3 random wrong English words
+        while (wrongEnglishWords.length < 3) {
+          const randomWord = wordList.words[Math.floor(Math.random() * wordList.words.length)];
+          if (randomWord.definition !== correctEnglishWord && 
+              !wrongEnglishWords.includes(randomWord.definition)) {
+            wrongEnglishWords.push(randomWord.definition);
+          }
+        }
+        
+        // Shuffle all options (English words)
+        options = [correctEnglishWord, ...wrongEnglishWords].sort(() => Math.random() - 0.5);
+      }
+      
+      return {
+        word: wordItem.word,
+        definition: wordItem.definition,
+        options: options
+      };
+    });
+
+    setQuestions(gameQuestions);
+  }, [wordList, quizMode]);
+
+  // Reset game state when word list or mode changes
+  useEffect(() => {
+    setCurrentQuestion(0);
+    setSelectedAnswer(null);
+    setScore(0);
+    setShowResult(false);
+    setGameComplete(false);
+  }, [selectedWordList, quizMode]);
+
+  // If no word list is selected, show message
+  if (!selectedWordList) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-8">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 text-center max-w-md">
+          <div className="text-6xl mb-4">📚</div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">No Word List Selected</h1>
+          <p className="text-gray-600 mb-6">Please go back and select a word list first.</p>
+          <Link 
+            href="/" 
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 inline-block"
+          >
+            Go Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-8">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 text-center max-w-md">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 mx-auto mb-6"></div>
+          <p className="text-gray-700 font-medium text-lg">Loading {selectedWordList} word list...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-8">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 text-center max-w-md">
+          <div className="text-6xl mb-4">❌</div>
+          <h1 className="text-3xl font-bold text-red-600 mb-4">Error</h1>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <Link 
+            href="/" 
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 inline-block"
+          >
+            Go Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // No questions available
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-8">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 text-center max-w-md">
+          <div className="text-6xl mb-4">❓</div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">No Questions Available</h1>
+          <p className="text-gray-600 mb-6">The selected word list appears to be empty.</p>
+          <Link 
+            href="/" 
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 inline-block"
+          >
+            Go Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const currentQ = questions[currentQuestion];
+
+  const handleAnswerSelect = (answer: string) => {
+    setSelectedAnswer(answer);
     setShowResult(true);
-
-    if (option[0] === currentQuestion[0]) {
-      setScore(prev => prev + 1);
+    
+    // Check if answer is correct based on current mode
+    const correctAnswer = quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition;
+    if (answer === correctAnswer) {
+      setScore(score + 1);
     }
   };
 
   const nextQuestion = () => {
-    if (questionNumber >= 20) {
-      setQuizComplete(true);
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+      setSelectedAnswer(null);
+      setShowResult(false);
     } else {
-      setQuestionNumber(prev => prev + 1);
-      generateQuestion();
+      setGameComplete(true);
     }
-  };
-
-  const startNewQuiz = () => {
-    setQuestionNumber(1);
-    setScore(0);
-    setQuizComplete(false);
-    setUsedQuestions([]);
-    setShowWelcome(false);
-    generateQuestion();
-  };
-
-  const startQuiz = () => {
-    setShowWelcome(false);
-    generateQuestion();
   };
 
   const toggleMode = () => {
-    setMode(prev => (prev === 'tajik-to-english' ? 'english-to-tajik' : 'tajik-to-english'));
-    setQuestionNumber(1);
+    setQuizMode(prev => prev === 'tajik-to-english' ? 'english-to-tajik' : 'tajik-to-english');
+  };
+
+  const restartGame = () => {
+    setCurrentQuestion(0);
+    setSelectedAnswer(null);
     setScore(0);
-    setQuizComplete(false);
-    setUsedQuestions([]);
-    generateQuestion();
+    setShowResult(false);
+    setGameComplete(false);
   };
 
-  useEffect(() => {
-    if (!showWelcome) {
-      generateQuestion();
-    }
-  }, []);
+  if (gameComplete) {
+    const percentage = (score / questions.length) * 100;
+    const getScoreEmoji = () => {
+      if (score === questions.length) return '🏆';
+      if (percentage >= 80) return '🎉';
+      if (percentage >= 60) return '👍';
+      return '💪';
+    };
 
-  const getScoreMessage = () => {
-    const percentage = (score / 20) * 100;
-    if (percentage === 100) return "Perfect! You're a Tajik vocabulary master! 🏆";
-    if (percentage >= 90) return "Excellent work! Almost perfect! 🌟";
-    if (percentage >= 80) return "Great job! You know your vocabulary well! 🎉";
-    if (percentage >= 70) return "Good work! Keep practicing! 👍";
-    if (percentage >= 60) return "Not bad! You're getting there! 💪";
-    return "Keep studying! Practice makes perfect! 📚";
-  };
+    const getScoreMessage = () => {
+      if (score === questions.length) return 'Perfect Score!';
+      if (percentage >= 80) return 'Excellent work!';
+      if (percentage >= 60) return 'Good effort!';
+      return 'Keep practicing!';
+    };
 
-  // Your JSX from the original stays the same.
-  // For brevity, you can now reuse the full JSX UI from your original file.
-
- if (showWelcome) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-2 sm:p-4 flex items-center justify-center">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2s"></div>
-        </div>
-
-        <div className="bg-blue bg-opacity-10 backdrop-blur-lg rounded-xl sm:rounded-2xl shadow-2xl p-6 sm:p-8 text-center text-white max-w-md w-full relative z-10">
-          <div className="mb-6 sm:mb-8">
-            <div className="text-4xl sm:text-6xl mb-4">📚</div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
-              First 100 Tajik Words
-            </h1>
-            <p className="text-sm sm:text-base text-gray-300 leading-relaxed mb-6">
-              Welcome! This quiz will help you practice the most essential Tajik vocabulary words. 
-              Test your knowledge with 20 random questions from the first 100 words every learner should know.
-            </p>
-            <div className="bg-blue bg-opacity-20 rounded-lg p-4 mb-6">
-              <h3 className="font-bold mb-2 text-yellow-300">How it works:</h3>
-              <ul className="text-xs sm:text-sm text-left space-y-1">
-                <li>• 20 questions per quiz</li>
-                <li>• Multiple choice format</li>
-                <li>• Switch between Tajik→English and English→Tajik</li>
-                <li>• See your final score and try again</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <button
-              onClick={startQuiz}
-              className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all font-bold text-base sm:text-lg transform hover:scale-105 shadow-lg"
-            >
-              Start Quiz (Tajik → English) 🚀
-            </button>
-            
-            <button
-              onClick={() => {
-                setMode('english-to-tajik');
-                startQuiz();
-              }}
-              className="w-full px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all font-medium text-sm sm:text-base transform hover:scale-105 shadow-lg"
-            >
-              Start Quiz (English → Tajik) 🎯
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Quiz Complete Screen
-  if (quizComplete) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-2 sm:p-4 flex items-center justify-center">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2s"></div>
-        </div>
-
-        <div className="bg-blue bg-opacity-10 backdrop-blur-lg rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-8 text-center text-white max-w-sm sm:max-w-md w-full relative z-10">
-          <Trophy className="w-12 h-12 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 text-yellow-400" />
-          
-          <h1 className="text-xl sm:text-3xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
-            Quiz Complete!
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-8">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-12 text-center max-w-lg">
+          <div className="text-8xl mb-6">{getScoreEmoji()}</div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">
+            Game Complete!
           </h1>
           
-          <div className="mb-4 sm:mb-6">
-            <div className="text-4xl sm:text-6xl font-bold text-white mb-2">
-              {score}/20
+          <div className="mb-8">
+            <div className="text-6xl font-bold text-gray-800 mb-2">
+              {score}/{questions.length}
             </div>
-            <div className="text-lg sm:text-xl text-gray-300 mb-3 sm:mb-4">
-              {Math.round((score / 20) * 100)}% Correct
+            <div className="text-xl text-gray-600 mb-4">
+              {Math.round(percentage)}% Correct
             </div>
-            <div className="text-sm sm:text-lg text-yellow-300 px-2">
+            <p className="text-2xl font-semibold text-purple-600">
               {getScoreMessage()}
-            </div>
+            </p>
           </div>
 
-          <div className="space-y-2 sm:space-y-3">
-            <button
-              onClick={startNewQuiz}
-              className="w-full px-4 sm:px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all font-bold text-base sm:text-lg transform hover:scale-105 shadow-lg"
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button 
+              onClick={restartGame}
+              className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200"
             >
-              Play Again 🎮
+              🔄 Play Again
             </button>
-            
-            <button
-              onClick={toggleMode}
-              className="w-full px-4 sm:px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all font-medium text-sm sm:text-base transform hover:scale-105 shadow-lg"
+            <Link 
+              href="/" 
+              className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 inline-block"
             >
-              Switch to {mode === 'tajik-to-english' ? 'English → Tajik' : 'Tajik → English'}
-            </button>
+              🏠 Choose Different Game
+            </Link>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!currentQuestion) return <div>Loading...</div>;
-
-  const questionText = mode === 'tajik-to-english' ? currentQuestion[0] : currentQuestion[1];
-  const answerIndex = mode === 'tajik-to-english' ? 1 : 0;
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-2 sm:p-4">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2s"></div>
-      </div>
-
-      <div className="max-w-lg mx-auto relative z-10">
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-8">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-blue bg-opacity-10 backdrop-blur-lg rounded-lg sm:rounded-xl shadow-2xl p-3 sm:p-6 mb-3 sm:mb-6 text-white">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
-              📚 First 100 Tajik Words
-            </h1>
-            
+        <div className="flex justify-between items-center mb-8">
+          <Link 
+            href="/" 
+            className="flex items-center text-white/90 hover:text-white font-semibold text-lg hover:underline transition-all duration-200"
+          >
+            <span className="mr-2">←</span> Back to Home
+          </Link>
+          
+          <div className="flex items-center gap-4">
             <button
               onClick={toggleMode}
-              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-md sm:rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105 text-xs sm:text-sm"
+              className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-white font-semibold hover:bg-white/30 transition-all duration-200 flex items-center gap-2"
             >
-              <Shuffle size={12} className="sm:w-4 sm:h-4" />
-              {mode === 'tajik-to-english' ? 'Tj→En' : 'En→Tj'}
+              <span className="text-lg">🔄</span>
+              {quizMode === 'tajik-to-english' ? 'Тоҷикӣ→English' : 'English→Тоҷикӣ'}
             </button>
-          </div>
-          
-          {/* Progress */}
-          <div className="mb-2 sm:mb-4">
-            <div className="flex items-center justify-between mb-1 sm:mb-2 text-xs sm:text-sm">
-              <span className="font-medium">Question {questionNumber} of 20</span>
-              <span className="font-medium">Score: {score}/{questionNumber - 1}</span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-1.5 sm:h-2">
-              <div 
-                className="bg-gradient-to-r from-green-400 to-blue-500 h-1.5 sm:h-2 rounded-full transition-all duration-500"
-                style={{ width: `${(questionNumber / 20) * 100}%` }}
-              />
+            
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-white font-semibold">
+              Question {currentQuestion + 1} of {questions.length}
             </div>
           </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="w-full bg-white/20 rounded-full h-4 mb-8 shadow-inner">
+          <div 
+            className="bg-gradient-to-r from-green-400 to-blue-500 h-4 rounded-full transition-all duration-500 shadow-lg"
+            style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+          ></div>
         </div>
 
         {/* Question Card */}
-        <div className="bg-blue bg-opacity-10 backdrop-blur-lg rounded-lg sm:rounded-xl shadow-2xl p-4 sm:p-8">
-          <div className="text-center mb-4 sm:mb-8">
-            <h2 className="text-xs sm:text-sm font-medium text-gray-300 mb-2 sm:mb-4">
-              {mode === 'tajik-to-english' ? 'What does this mean in English?' : 'How do you say this in Tajik?'}
-            </h2>
-            <div className="text-2xl sm:text-4xl font-bold text-white bg-blue bg-opacity-20 rounded-lg sm:rounded-xl py-4 sm:py-6 px-3 sm:px-4 backdrop-blur">
-              {questionText}
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-6">
+          <div className="flex items-center mb-6">
+            <div className="text-4xl mr-4">📝</div>
+            <h1 className="text-3xl font-bold text-gray-800">
+              Multiple Choice - {wordList?.name || selectedWordList}
+            </h1>
+          </div>
+          
+          <div className="mb-8">
+            <p className="text-xl text-gray-600 mb-4 font-medium">
+              {quizMode === 'english-to-tajik' 
+                ? 'What Tajik word matches this definition?' 
+                : 'What is the English meaning of this Tajik word?'
+              }
+            </p>
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-purple-500 p-6 rounded-xl">
+              <p className="text-2xl font-semibold text-gray-800 leading-relaxed">
+                {quizMode === 'english-to-tajik' ? currentQ.definition : currentQ.word}
+              </p>
             </div>
           </div>
 
-          {/* Options */}
-          <div className="grid grid-cols-1 gap-2 sm:gap-4 mb-4 sm:mb-8">
-            {options.map((option, index) => {
-              const isSelected = selectedAnswer && selectedAnswer[0] === option[0];
-              const isCorrect = option[0] === currentQuestion[0];
+          {/* Answer Options */}
+          <div className="grid gap-4 mb-8">
+            {currentQ.options.map((option, index) => {
+              const correctAnswer = quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition;
               
-              let buttonClass = "w-full p-3 sm:p-4 text-left rounded-md sm:rounded-lg border-2 transition-all duration-300 ";
-              
-              if (!showResult) {
-                buttonClass += "border-white border-opacity-30 bg-green bg-opacity-10 backdrop-blur text-white hover:border-opacity-60 hover:bg-opacity-20 cursor-pointer transform hover:scale-105";
-              } else {
-                if (isCorrect) {
-                  buttonClass += "border-green-400 bg-green-500 bg-opacity-20 text-green-100 transform scale-105";
-                } else if (isSelected && !isCorrect) {
-                  buttonClass += "border-red-400 bg-red-500 bg-opacity-20 text-red-100 transform scale-95";
-                } else {
-                  buttonClass += "border-gray-500 bg-gray-500 bg-opacity-10 text-gray-300";
-                }
-              }
-
               return (
                 <button
                   key={index}
                   onClick={() => handleAnswerSelect(option)}
-                  className={buttonClass}
                   disabled={showResult}
+                  className={`w-full p-5 text-left rounded-xl border-2 font-medium text-lg transition-all duration-200 transform hover:scale-[1.02] ${
+                    showResult
+                      ? option === correctAnswer
+                        ? 'bg-green-100 border-green-400 text-green-800 shadow-lg scale-[1.02]'
+                        : option === selectedAnswer
+                        ? 'bg-red-100 border-red-400 text-red-800 shadow-lg'
+                        : 'bg-gray-100 border-gray-300 text-gray-600'
+                      : 'bg-white hover:bg-blue-50 border-gray-300 hover:border-blue-400 text-gray-800 shadow-md hover:shadow-lg'
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm sm:text-lg font-medium">
-                      {option[answerIndex]}
-                    </span>
-                    {showResult && (
-                      <span className="ml-2">
-                        {isCorrect ? (
-                          <Check className="text-green-400" size={16} />
-                        ) : isSelected ? (
-                          <X className="text-red-400" size={16} />
-                        ) : null}
-                      </span>
-                    )}
+                  <div className="flex justify-between items-center">
+                    <span>{option}</span>
+                    {showResult && option === correctAnswer && <span className="text-2xl">✅</span>}
+                    {showResult && option === selectedAnswer && option !== correctAnswer && <span className="text-2xl">❌</span>}
                   </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Result and Next Button */}
+          {/* Result & Next Button */}
           {showResult && (
-            <div className="text-center">
-{selectedAnswer && (
-  <div
-    className={`text-lg sm:text-2xl font-bold mb-4 sm:mb-6 ${
-      selectedAnswer[0] === currentQuestion[0] ? 'text-green-400' : 'text-red-400'
-    }`}
-  >
-    {selectedAnswer[0] === currentQuestion[0] ? 'Correct! 🎉' : 'Incorrect 😔'}
-  </div>
-)}
-
-              
+            <div className="text-center border-t pt-6">
+              <div className={`inline-flex items-center px-6 py-3 rounded-xl font-bold text-xl mb-6 ${
+                selectedAnswer === (quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition)
+                  ? 'bg-green-100 text-green-700 border border-green-300' 
+                  : 'bg-red-100 text-red-700 border border-red-300'
+              }`}>
+                <span className="mr-2">{selectedAnswer === (quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition) ? '🎉' : '😔'}</span>
+                {selectedAnswer === (quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition) 
+                  ? 'Correct!' 
+                  : `Incorrect. The answer was "${quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition}".`
+                }
+              </div>
+              <br />
               <button
                 onClick={nextQuestion}
-                className="px-6 sm:px-8 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-md sm:rounded-lg hover:from-green-600 hover:to-blue-600 transition-all font-bold text-sm sm:text-lg transform hover:scale-105 shadow-lg"
+                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 text-lg"
               >
-                {questionNumber >= 20 ? 'See Results' : 'Next Question'} →
+                {currentQuestion < questions.length - 1 ? '➡️ Next Question' : '🏁 Finish Game'}
               </button>
             </div>
           )}
         </div>
+
+        {/* Score Display */}
+        <div className="text-center">
+          <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-xl px-6 py-3 shadow-lg">
+            <span className="text-2xl mr-3">🏆</span>
+            <span className="text-xl font-bold text-gray-800">
+              Current Score: {score} / {currentQuestion + (showResult ? 1 : 0)}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
-};
-
-export default TajikVocabApp;
-    // Paste your JSX here exactly as it was.
-    // If you want me to plug it in for you with types, let me know
+}

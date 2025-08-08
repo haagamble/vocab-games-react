@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { WordListProvider } from "./WordListContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,7 +28,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* Wrap all pages with word list context */}
+        <WordListProvider>
+          {children}
+        </WordListProvider>
+        
+        {/* Footer appears on every page */}
+        <footer className="flex gap-[24px] flex-wrap items-center justify-center p-4">
+          
+        </footer>
       </body>
     </html>
   );
