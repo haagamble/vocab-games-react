@@ -67,14 +67,14 @@ export default function Home() {
             </div>
             
             {/* Show selected word list */}
-            {selectedWordList && (
+            {/* {selectedWordList && (
               <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-green-700 font-medium flex items-center">
                   <span className="text-green-500 mr-2">✓</span>
                   Selected: {availableWordLists.find(list => list.filename === selectedWordList)?.display || selectedWordList}
                 </p>
               </div>
-            )}
+            )} */}
           </div>
 
           {/* Game Cards */}
@@ -88,7 +88,7 @@ export default function Home() {
               }`}
             >
               <div className="text-4xl mb-4">📝</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Multiple Choice Claude</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">Multiple Choice</h2>
               <p className="text-gray-600 mb-4">
                 Test your vocabulary with multiple choice questions.
               </p>
@@ -107,7 +107,7 @@ export default function Home() {
             </Link>
 
             <Link
-              href="/multiple-choice-claude-v1"
+              href="/matching"
               className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-green-200 cursor-pointer' 
@@ -115,7 +115,7 @@ export default function Home() {
               }`}
             >
               <div className="text-4xl mb-4">🔗</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Multiple Choice Claude v1</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">Matching</h2>
               <p className="text-gray-600 mb-4">
                 Match words with their definitions.
               </p>
@@ -134,7 +134,7 @@ export default function Home() {
             </Link>
 
             <Link
-              href="/multiple-choice-claude-v2"
+              href="/test-matching"
               className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-orange-200 cursor-pointer' 
@@ -142,7 +142,7 @@ export default function Home() {
               }`}
             >
               <div className="text-4xl mb-4">📚</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Multiple Choice Claude v2 (Errors)</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">Matching (test)</h2>
               <p className="text-gray-600 mb-4">
                 Study vocabulary with flashcards.
               </p>
@@ -161,7 +161,7 @@ export default function Home() {
             </Link>
 
             <Link
-              href="/multiple-choice-v2"
+              href="/flashcards"
               className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-pink-200 cursor-pointer' 
@@ -169,7 +169,7 @@ export default function Home() {
               }`}
             >
               <div className="text-4xl mb-4">✍️</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Multiple Choice Original v2</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">Flashcards</h2>
               <p className="text-gray-600 mb-4">
                 Practice spelling vocabulary words.
               </p>
