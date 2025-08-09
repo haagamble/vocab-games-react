@@ -415,9 +415,7 @@ export default function MatchingGame() {
                 ${card.isFlipped || card.isMatched ? 'rotate-y-180 opacity-0' : 'rotate-y-0 opacity-100'}
                 bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 border-2 border-white/30
               `}>
-                <div className="h-full w-full flex items-center justify-center">
-                  <div className="text-white text-2xl sm:text-3xl">🎴</div>
-                </div>
+
               </div>
 
               {/* Card Front */}
