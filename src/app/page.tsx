@@ -128,9 +128,9 @@ export default function Home() {
                 </div>
               )}
             </Link>
-
+            {/* Flashcards */}
             <Link
-              href="/coming-soon"
+              href="/flashcards"
               className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-orange-200 cursor-pointer' 
@@ -151,12 +151,13 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-center py-2 px-4 rounded-lg font-semibold">
-                  Coming Soon →
+                  Study Now →
                 </div>
               )}
             </Link>
+            {/* template for future activities */}
             {/* <Link
-              href="/wordsearch"
+              href="/[put-link-here]"
               className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-pink-200 cursor-pointer' 
@@ -164,7 +165,7 @@ export default function Home() {
               }`}
             >
               <div className="text-4xl mb-4">⏰👀</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Activity #4</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">Activity Name</h2>
               <p className="text-gray-600 mb-4">
                 Stay tuned for more activities!
               </p>
@@ -181,7 +182,7 @@ export default function Home() {
                 </div>
               )}
             </Link> */}
-
+            {/* Wordsearch */}
             <Link
               href="/wordsearch"
               className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${

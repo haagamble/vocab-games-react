@@ -1,244 +1,184 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import { useWordList } from '../WordListContext';
-import { useEffect, useState } from 'react';
-import { loadWordList, shuffleArray, WordItem, WordList } from '../utils/wordListLoader';
+import { loadWordList, WordItem, WordList } from '../utils/wordListLoader';
+import confetti from 'canvas-confetti';
 
-interface FlashcardProgress {
-  wordId: string;
+type StudyMode = 'all' | 'wrong-only';
+
+type CardRecord = {
+  id: string;
   word: string;
   definition: string;
   correctCount: number;
   incorrectCount: number;
-  lastReviewed: Date;
-  difficulty: 'easy' | 'medium' | 'hard';
-  isLearned: boolean;
-}
+  lastResult?: 'correct' | 'incorrect';
+};
 
-type StudyMode = 'all' | 'new' | 'difficult' | 'review';
-type CardSide = 'tajik' | 'english';
-
-export default function FlashcardsPage() {
+export default function Flashcards() {
   const { selectedWordList } = useWordList();
-  const [wordList, setWordList] = useState<WordList | null>(null);
-  const [flashcards, setFlashcards] = useState<FlashcardProgress[]>([]);
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [studyMode, setStudyMode] = useState<StudyMode>('all');
-  const [frontSide, setFrontSide] = useState<CardSide>('tajik');
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sessionStats, setSessionStats] = useState({
-    studied: 0,
-    correct: 0,
-    incorrect: 0
-  });
-  const [showStats, setShowStats] = useState(false);
-  const [filteredCards, setFilteredCards] = useState<FlashcardProgress[]>([]);
+  const [wordList, setWordList] = useState<WordList | null>(null);
 
-  // Load word list and initialize progress
+  const [cards, setCards] = useState<CardRecord[]>([]);
+  const [wrongIds, setWrongIds] = useState<Set<string>>(new Set());
+  const [rightIds, setRightIds] = useState<Set<string>>(new Set());
+
+  const [studyMode, setStudyMode] = useState<StudyMode>('all');
+  const [frontIsTajik, setFrontIsTajik] = useState<boolean>(true);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [celebrated, setCelebrated] = useState(false);
+
+  const storageKey = selectedWordList ? `flashcards-progress-${selectedWordList}` : '';
+
+  // Load word list and saved progress
   useEffect(() => {
-    async function loadWordListData() {
+    async function run() {
       if (!selectedWordList) {
         setLoading(false);
         return;
       }
-
       try {
         setLoading(true);
         setError(null);
-        
         const data = await loadWordList(selectedWordList);
-        
         if (!data) {
           setError(`Failed to load word list: ${selectedWordList}`);
           return;
         }
-
         setWordList(data);
-        
-        // Load saved progress from localStorage or initialize new progress
-        const savedProgressKey = `flashcard-progress-${selectedWordList}`;
-        const savedProgress = localStorage.getItem(savedProgressKey);
-        
-        let progress: FlashcardProgress[];
-        
-        if (savedProgress) {
-          const parsed = JSON.parse(savedProgress);
-          // Ensure all words from the list are included (in case list was updated)
-          progress = data.words.map(wordItem => {
-            const existingProgress = parsed.find((p: FlashcardProgress) => p.wordId === `${wordItem.word}-${wordItem.definition}`);
-            return existingProgress || {
-              wordId: `${wordItem.word}-${wordItem.definition}`,
-              word: wordItem.word,
-              definition: wordItem.definition,
-              correctCount: 0,
-              incorrectCount: 0,
-              lastReviewed: new Date(),
-              difficulty: 'medium' as const,
-              isLearned: false
-            };
-          });
+
+        // Initialize cards
+        const initial: CardRecord[] = data.words.map((w: WordItem) => ({
+          id: `${w.word}::${w.definition}`,
+          word: w.word,
+          definition: w.definition,
+          correctCount: 0,
+          incorrectCount: 0,
+          lastResult: undefined,
+        }));
+
+        // Merge saved progress if present
+        const raw = localStorage.getItem(storageKey);
+        if (raw) {
+          const saved = JSON.parse(raw) as { cards: CardRecord[]; wrongIds: string[]; rightIds?: string[] };
+          const savedById = new Map(saved.cards.map((c) => [c.id, c] as const));
+          const merged = initial.map((c) => savedById.get(c.id) ?? c);
+          setCards(merged);
+          setWrongIds(new Set(saved.wrongIds ?? []));
+          if (saved.rightIds) {
+            setRightIds(new Set(saved.rightIds));
+          } else {
+            // Derive rightIds if not saved: correct once and not currently wrong
+            const derived = merged.filter((c) => c.correctCount > 0 && !(saved.wrongIds ?? []).includes(c.id)).map((c) => c.id);
+            setRightIds(new Set(derived));
+          }
         } else {
-          // Initialize progress for all words
-          progress = data.words.map(wordItem => ({
-            wordId: `${wordItem.word}-${wordItem.definition}`,
-            word: wordItem.word,
-            definition: wordItem.definition,
-            correctCount: 0,
-            incorrectCount: 0,
-            lastReviewed: new Date(),
-            difficulty: 'medium' as const,
-            isLearned: false
-          }));
+          setCards(initial);
+          setWrongIds(new Set());
+          setRightIds(new Set());
         }
-        
-        setFlashcards(progress);
-        
-      } catch (err) {
-        setError(`Error loading word list: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Unknown error');
       } finally {
         setLoading(false);
       }
     }
-
-    loadWordListData();
+    run();
+    // reset session state
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setCelebrated(false);
   }, [selectedWordList]);
 
-  // Filter and shuffle cards based on study mode
+  // Persist progress
   useEffect(() => {
-    if (flashcards.length === 0) return;
+    if (!storageKey) return;
+    const wrong = Array.from(wrongIds);
+    const right = Array.from(rightIds);
+    localStorage.setItem(storageKey, JSON.stringify({ cards, wrongIds: wrong, rightIds: right }));
+  }, [cards, wrongIds, rightIds, storageKey]);
 
-    let filtered: FlashcardProgress[] = [];
-
-    switch (studyMode) {
-      case 'all':
-        filtered = [...flashcards];
-        break;
-      case 'new':
-        filtered = flashcards.filter(card => card.correctCount === 0 && card.incorrectCount === 0);
-        break;
-      case 'difficult':
-        filtered = flashcards.filter(card => 
-          card.difficulty === 'hard' || 
-          (card.incorrectCount > card.correctCount && card.incorrectCount > 0)
-        );
-        break;
-      case 'review':
-        const oneDayAgo = new Date();
-        oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-        filtered = flashcards.filter(card => 
-          card.lastReviewed < oneDayAgo || 
-          (card.correctCount > 0 && !card.isLearned)
-        );
-        break;
+  // Build current deck based on mode
+  const deck = useMemo(() => {
+    if (studyMode === 'wrong-only') {
+      return cards.filter((c) => wrongIds.has(c.id));
     }
+    // In 'all' mode, skip cards already in the right stack
+    return cards.filter((c) => !rightIds.has(c.id));
+  }, [cards, wrongIds, rightIds, studyMode]);
 
-    if (filtered.length === 0) {
-      filtered = [...flashcards]; // Fallback to all cards
+  const current = deck[currentIndex];
+
+  // Clamp current index when deck changes (e.g., removing items from wrong list)
+  useEffect(() => {
+    if (deck.length === 0) {
+      if (currentIndex !== 0) setCurrentIndex(0);
+    } else if (currentIndex >= deck.length) {
+      setCurrentIndex(0);
     }
+  }, [deck.length, currentIndex]);
 
-    setFilteredCards(shuffleArray(filtered));
-    setCurrentCardIndex(0);
-    setIsFlipped(false);
-  }, [flashcards, studyMode]);
-
-  // Save progress to localStorage
-  const saveProgress = (updatedCards: FlashcardProgress[]) => {
-    if (selectedWordList) {
-      const savedProgressKey = `flashcard-progress-${selectedWordList}`;
-      localStorage.setItem(savedProgressKey, JSON.stringify(updatedCards));
+  // Celebrate only when all words have been answered correctly at least once and no wrongs remain
+  useEffect(() => {
+    if (cards.length === 0) return;
+    const allCorrectOnce = cards.every((c) => c.correctCount > 0);
+    if (wrongIds.size === 0 && allCorrectOnce && !celebrated) {
+      setCelebrated(true);
+      confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
     }
-  };
+  }, [wrongIds.size, celebrated, cards]);
 
-  // Calculate difficulty based on performance
-  const calculateDifficulty = (correct: number, incorrect: number): 'easy' | 'medium' | 'hard' => {
-    const total = correct + incorrect;
-    if (total === 0) return 'medium';
-    
-    const successRate = correct / total;
-    if (successRate >= 0.8) return 'easy';
-    if (successRate >= 0.5) return 'medium';
-    return 'hard';
-  };
+  const flip = () => setIsFlipped((f) => !f);
 
-  // Handle marking card as correct or incorrect
-  const handleCardResponse = (isCorrect: boolean) => {
-    if (filteredCards.length === 0) return;
+  const mark = (isCorrect: boolean) => {
+    if (!current) return;
 
-    const currentCard = filteredCards[currentCardIndex];
-    
-    // Update progress
-    const updatedFlashcards = flashcards.map(card => {
-      if (card.wordId === currentCard.wordId) {
-        const newCorrect = isCorrect ? card.correctCount + 1 : card.correctCount;
-        const newIncorrect = isCorrect ? card.incorrectCount : card.incorrectCount + 1;
-        const newDifficulty = calculateDifficulty(newCorrect, newIncorrect);
-        const newIsLearned = newCorrect >= 3 && newCorrect >= newIncorrect * 2;
-        
-        return {
-          ...card,
-          correctCount: newCorrect,
-          incorrectCount: newIncorrect,
-          lastReviewed: new Date(),
-          difficulty: newDifficulty,
-          isLearned: newIsLearned
-        };
-      }
-      return card;
+    setCards((prev) =>
+      prev.map((c) =>
+        c.id === current.id
+          ? {
+              ...c,
+              correctCount: c.correctCount + (isCorrect ? 1 : 0),
+              incorrectCount: c.incorrectCount + (isCorrect ? 0 : 1),
+              lastResult: isCorrect ? 'correct' : 'incorrect',
+            }
+          : c
+      )
+    );
+
+    setWrongIds((prev) => {
+      const next = new Set(prev);
+      if (isCorrect) next.delete(current.id); else next.add(current.id);
+      return next;
     });
 
-    setFlashcards(updatedFlashcards);
-    saveProgress(updatedFlashcards);
+    setRightIds((prev) => {
+      const next = new Set(prev);
+      if (isCorrect) next.add(current.id); else next.delete(current.id);
+      return next;
+    });
 
-    // Update session stats
-    setSessionStats(prev => ({
-      studied: prev.studied + 1,
-      correct: isCorrect ? prev.correct + 1 : prev.correct,
-      incorrect: isCorrect ? prev.incorrect : prev.incorrect + 1
-    }));
-
-    // Move to next card
+    // advance
     setIsFlipped(false);
-    if (currentCardIndex < filteredCards.length - 1) {
-      setCurrentCardIndex(prev => prev + 1);
+    let nextIndex = 0;
+    if (studyMode === 'wrong-only' && isCorrect) {
+      // Keep the same index so the next wrong card shifts into this slot
+      nextIndex = Math.min(currentIndex, Math.max(0, deck.length - 1));
+    } else if (currentIndex < deck.length - 1) {
+      nextIndex = currentIndex + 1;
     } else {
-      // End of deck - show stats
-      setShowStats(true);
+      nextIndex = 0;
     }
+    setCurrentIndex(nextIndex);
   };
 
-  const flipCard = () => {
-    setIsFlipped(!isFlipped);
-  };
-
-  const resetSession = () => {
-    setCurrentCardIndex(0);
-    setIsFlipped(false);
-    setShowStats(false);
-    setSessionStats({ studied: 0, correct: 0, incorrect: 0 });
-    // Re-filter and shuffle cards
-    const filtered = filteredCards.slice();
-    setFilteredCards(shuffleArray(filtered));
-  };
-
-  const currentCard = filteredCards[currentCardIndex];
-  const progress = filteredCards.length > 0 ? ((currentCardIndex) / filteredCards.length) * 100 : 0;
-
-  // Get stats for different categories
-  const getStats = () => {
-    const newCards = flashcards.filter(card => card.correctCount === 0 && card.incorrectCount === 0).length;
-    const difficultCards = flashcards.filter(card => 
-      card.difficulty === 'hard' || 
-      (card.incorrectCount > card.correctCount && card.incorrectCount > 0)
-    ).length;
-    const learnedCards = flashcards.filter(card => card.isLearned).length;
-    
-    return { newCards, difficultCards, learnedCards, total: flashcards.length };
-  };
-
-  // No word list selected
   if (!selectedWordList) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-8">
@@ -246,18 +186,12 @@ export default function FlashcardsPage() {
           <div className="text-6xl mb-4">📚</div>
           <h1 className="text-3xl font-bold text-gray-800 mb-4">No Word List Selected</h1>
           <p className="text-gray-600 mb-6">Please go back and select a word list first.</p>
-          <Link 
-            href="/" 
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 inline-block"
-          >
-            Go Back to Home
-          </Link>
+          <Link href="/" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 inline-block">Go Back to Home</Link>
         </div>
       </div>
     );
   }
 
-  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-8">
@@ -269,7 +203,6 @@ export default function FlashcardsPage() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-8">
@@ -277,274 +210,132 @@ export default function FlashcardsPage() {
           <div className="text-6xl mb-4">❌</div>
           <h1 className="text-3xl font-bold text-red-600 mb-4">Error</h1>
           <p className="text-gray-600 mb-6">{error}</p>
-          <Link 
-            href="/" 
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 inline-block"
-          >
-            Go Back to Home
-          </Link>
+          <Link href="/" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 inline-block">Go Back to Home</Link>
         </div>
       </div>
     );
   }
 
-  // Session complete
-  if (showStats) {
-    const stats = getStats();
-    const sessionAccuracy = sessionStats.studied > 0 ? Math.round((sessionStats.correct / sessionStats.studied) * 100) : 0;
-    
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-8">
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-12 text-center max-w-2xl">
-          <div className="text-8xl mb-6">🎉</div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">
-            Session Complete!
-          </h1>
-          
-          <div className="grid grid-cols-2 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6">
-              <div className="text-4xl font-bold text-green-600">{sessionStats.correct}</div>
-              <div className="text-green-700 font-semibold">Correct</div>
-            </div>
-            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-2xl p-6">
-              <div className="text-4xl font-bold text-red-600">{sessionStats.incorrect}</div>
-              <div className="text-red-700 font-semibold">Incorrect</div>
-            </div>
-          </div>
+  const total = cards.length;
+  const wrongCount = wrongIds.size;
+  const deckCount = deck.length;
+  const progress = total > 0 ? Math.round((rightIds.size / total) * 100) : 0;
 
-          <div className="mb-8">
-            <div className="text-3xl font-bold text-gray-800 mb-2">
-              {sessionAccuracy}% Accuracy
-            </div>
-            <div className="text-lg text-gray-600">
-              You studied {sessionStats.studied} cards
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-8 text-sm">
-            <div className="bg-blue-50 rounded-lg p-3">
-              <div className="font-bold text-blue-800">{stats.learnedCards}</div>
-              <div className="text-blue-600">Learned</div>
-            </div>
-            <div className="bg-orange-50 rounded-lg p-3">
-              <div className="font-bold text-orange-800">{stats.difficultCards}</div>
-              <div className="text-orange-600">Difficult</div>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={resetSession}
-              className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200"
-            >
-              🔄 Study More
-            </button>
-            <Link 
-              href="/" 
-              className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 inline-block"
-            >
-              🏠 Back to Home
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Main flashcard interface
-  if (!currentCard || filteredCards.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-8">
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 text-center max-w-md">
-          <div className="text-6xl mb-4">🎯</div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">No Cards Available</h1>
-          <p className="text-gray-600 mb-6">
-            Try selecting a different study mode or add some words to your list.
-          </p>
-          <Link 
-            href="/" 
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 inline-block"
-          >
-            Go Back to Home
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const stats = getStats();
+  const allCorrect = total > 0 && wrongCount === 0 && cards.every((c) => c.correctCount > 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <Link 
-            href="/" 
-            className="flex items-center text-white/90 hover:text-white font-semibold text-lg hover:underline transition-all duration-200"
-          >
+          <Link href="/" className="flex items-center text-white/90 hover:text-white font-semibold text-lg hover:underline transition-all duration-200">
             <span className="mr-2">←</span> Back to Home
           </Link>
-          
-          <div className="flex items-center gap-3">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1 text-white text-sm font-medium">
-              {currentCardIndex + 1} / {filteredCards.length}
+          <div className="flex items-center gap-3 text-white/90">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1 text-sm font-medium">
+              {`${rightIds.size} / ${total}`}
             </div>
           </div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Progress */}
         <div className="mb-6">
           <div className="bg-white/20 rounded-full h-2 overflow-hidden">
-            <div 
-              className="bg-gradient-to-r from-yellow-400 to-orange-400 h-full transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-400 h-full transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
-        {/* Control Bar */}
+        {/* Controls */}
         <div className="mb-8">
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg p-4">
             <div className="flex flex-wrap justify-center gap-4 mb-4">
-              <select 
-                value={studyMode} 
-                onChange={(e) => setStudyMode(e.target.value as StudyMode)}
-                className="px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              <select
+                value={studyMode}
+                onChange={(e) => { setStudyMode(e.target.value as StudyMode); setIsFlipped(false); }}
+                className="px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800"
               >
-                <option value="all">All Cards ({stats.total})</option>
-                <option value="new">New Cards ({stats.newCards})</option>
-                <option value="difficult">Difficult ({stats.difficultCards})</option>
-                <option value="review">Review ({stats.total - stats.learnedCards})</option>
+                <option value="all">All Cards ({total})</option>
+                <option value="wrong-only" disabled={wrongCount === 0}>Wrong Only ({wrongCount})</option>
               </select>
 
-              <select 
-                value={frontSide} 
-                onChange={(e) => setFrontSide(e.target.value as CardSide)}
-                className="px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              <select
+                value={frontIsTajik ? 'tajik' : 'english'}
+                onChange={(e) => setFrontIsTajik(e.target.value === 'tajik')}
+                className="px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800"
               >
                 <option value="tajik">Tajik → English</option>
                 <option value="english">English → Tajik</option>
               </select>
-            </div>
 
-            <div className="flex justify-center gap-6 text-sm">
-              <div className="text-center">
-                <div className="font-bold text-green-600">{stats.learnedCards}</div>
-                <div className="text-gray-600">Learned</div>
-              </div>
-              <div className="text-center">
-                <div className="font-bold text-orange-600">{stats.difficultCards}</div>
-                <div className="text-gray-600">Difficult</div>
-              </div>
-              <div className="text-center">
-                <div className="font-bold text-blue-600">{stats.newCards}</div>
-                <div className="text-gray-600">New</div>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="text-green-700 font-semibold bg-green-50 rounded px-2 py-1">Correct: {rightIds.size}</div>
+                <div className="text-red-700 font-semibold bg-red-50 rounded px-2 py-1">Wrong: {wrongIds.size}</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Flashcard */}
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">Flashcards</h1>
+          <p className="text-white/80 text-lg">Flip the card, then mark if you were right or wrong. Practice your wrong list until it's empty.</p>
+        </div>
+
+        {/* Card */}
         <div className="mb-8">
           <div className="relative mx-auto max-w-2xl">
-            <div 
-              onClick={flipCard}
-              className="bg-white rounded-3xl shadow-2xl cursor-pointer transition-all duration-300 hover:shadow-3xl transform hover:-translate-y-1 min-h-[400px] flex flex-col"
-            >
-              {/* Card Header */}
+            <div onClick={flip} className="bg-white rounded-3xl shadow-2xl cursor-pointer transition-all duration-300 hover:shadow-3xl transform hover:-translate-y-1 min-h-[360px] flex flex-col">
               <div className="p-6 border-b border-gray-100">
                 <div className="flex justify-between items-center">
-                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    currentCard.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
-                    currentCard.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {currentCard.difficulty}
-                  </div>
-                  <div className="text-gray-500 text-sm">
-                    {currentCard.isLearned ? '✅ Learned' : 
-                     `${currentCard.correctCount}✓ ${currentCard.incorrectCount}✗`}
-                  </div>
+                  <div className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">{frontIsTajik ? 'Тоҷикӣ → English' : 'English → Тоҷикӣ'}</div>
+                  <div className="text-gray-500 text-sm">Wrong list: {wrongCount}</div>
                 </div>
               </div>
-
-              {/* Card Content */}
               <div className="flex-1 flex items-center justify-center p-8">
                 <div className="text-center">
-                  <div className="text-6xl mb-6">
-                    {isFlipped ? '🔄' : '❓'}
-                  </div>
+                  <div className="text-6xl mb-6">{isFlipped ? '🔄' : '❓'}</div>
                   <div className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
-                    {isFlipped ? 
-                      (frontSide === 'tajik' ? currentCard.definition : currentCard.word) :
-                      (frontSide === 'tajik' ? currentCard.word : currentCard.definition)
-                    }
+                    {current
+                      ? isFlipped
+                        ? frontIsTajik
+                          ? current.definition
+                          : current.word
+                        : frontIsTajik
+                          ? current.word
+                          : current.definition
+                      : 'No cards'}
                   </div>
                   <div className="text-lg text-gray-500 mb-6">
-                    {isFlipped ? 
-                      (frontSide === 'tajik' ? 'English' : 'Tajik') :
-                      (frontSide === 'tajik' ? 'Tajik' : 'English')
-                    }
+                    {isFlipped ? (frontIsTajik ? 'English' : 'Tajik') : (frontIsTajik ? 'Tajik' : 'English')}
                   </div>
-                  {!isFlipped && (
-                    <div className="text-gray-400 text-sm">
-                      Click to reveal answer
-                    </div>
-                  )}
+                  {!isFlipped && <div className="text-gray-400 text-sm">Click to reveal answer</div>}
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Actions */}
         <div className="flex justify-center gap-4">
           {!isFlipped ? (
-            <button
-              onClick={flipCard}
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 text-lg"
-            >
-              🔍 Show Answer
-            </button>
+            <button onClick={flip} className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 text-lg">🔍 Show Answer</button>
           ) : (
             <>
-              <button
-                onClick={() => handleCardResponse(false)}
-                className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 text-lg"
-              >
-                ❌ Incorrect
-              </button>
-              <button
-                onClick={() => handleCardResponse(true)}
-                className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 text-lg"
-              >
-                ✅ Correct
-              </button>
+              <button onClick={() => mark(false)} className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 text-lg">❌ Wrong</button>
+              <button onClick={() => mark(true)} className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 text-lg">✅ Right</button>
             </>
           )}
         </div>
 
-        {/* Session Stats */}
-        <div className="mt-8 text-center">
-          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 inline-block">
-            <div className="flex items-center gap-6 text-white">
-              <div>
-                <div className="font-bold text-2xl">{sessionStats.studied}</div>
-                <div className="text-sm opacity-80">Studied</div>
-              </div>
-              <div>
-                <div className="font-bold text-2xl text-green-200">{sessionStats.correct}</div>
-                <div className="text-sm opacity-80">Correct</div>
-              </div>
-              <div>
-                <div className="font-bold text-2xl text-red-200">{sessionStats.incorrect}</div>
-                <div className="text-sm opacity-80">Incorrect</div>
-              </div>
-            </div>
+        {/* Celebration */}
+        {allCorrect && (
+          <div className="mt-8 p-4 bg-gradient-to-r from-green-400 to-green-500 border-0 rounded-lg text-white font-bold text-center shadow-lg">
+            <div className="text-2xl mb-1">🎉 Awesome!</div>
+            <div>You’ve answered all words correctly.</div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
+
+
