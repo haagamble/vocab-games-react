@@ -29,7 +29,7 @@ export default function Home() {
       { display: 'First 100 Words', filename: 'first-100-words' },
       { display: 'Food & Drink', filename: 'food-and-drink' },
       { display: 'Friends & Family', filename: 'friends-and-family' },
-      { display: 'Spiritual Vocab', filename: 'spiritual-vocab' },
+      { display: 'Spiritual Vocab', filename: 'spiritual' },
       { display: 'Verbs: Level 1', filename: 'verbs-1' },
       { display: 'Verbs: Level 2', filename: 'verbs-2' },     
     ];
@@ -46,7 +46,7 @@ export default function Home() {
               Welcome to Vocab Games
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl">
-              A collection of games to help you learn and practice vocabulary.
+              A collection of activities to help you learn and practice vocabulary.
             </p>
           </div>
           
@@ -70,20 +70,11 @@ export default function Home() {
                 ))}
               </select>
             </div>
-            
-            {/* Show selected word list */}
-            {/* {selectedWordList && (
-              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-green-700 font-medium flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
-                  Selected: {availableWordLists.find(list => list.filename === selectedWordList)?.display || selectedWordList}
-                </p>
-              </div>
-            )} */}
           </div>
 
           {/* Game Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full mt-8">
+            {/* Multiple Choice */}
             <Link
               href="/multiple-choice"
               className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
@@ -92,7 +83,7 @@ export default function Home() {
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-4xl mb-4">📝</div>
+              <div className="text-4xl mb-4">🔠✅</div>
               <h2 className="text-2xl font-bold text-gray-800 mb-3">Multiple Choice</h2>
               <p className="text-gray-600 mb-4">
                 Test your vocabulary with multiple choice questions.
@@ -109,8 +100,8 @@ export default function Home() {
                   Start Quiz →
                 </div>
               )}
-            </Link>
-
+            </Link>            
+            {/* Matching */}
             <Link
               href="/matching"
               className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
@@ -119,10 +110,10 @@ export default function Home() {
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-4xl mb-4">🔗</div>
+              <div className="text-4xl mb-4">🎴🎴</div>
               <h2 className="text-2xl font-bold text-gray-800 mb-3">Matching</h2>
               <p className="text-gray-600 mb-4">
-                Match words with their definitions.
+                Match Tajik and English words.
               </p>
               {!selectedWordList ? (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">
@@ -139,15 +130,15 @@ export default function Home() {
             </Link>
 
             <Link
-              href="/test-matching"
+              href="/coming-soon"
               className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-orange-200 cursor-pointer' 
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-4xl mb-4">📚</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Matching (test)</h2>
+              <div className="text-4xl mb-4">🃏🔄 </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">Flashcards</h2>
               <p className="text-gray-600 mb-4">
                 Study vocabulary with flashcards.
               </p>
@@ -160,23 +151,22 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-center py-2 px-4 rounded-lg font-semibold">
-                  Study Cards →
+                  Coming Soon →
                 </div>
               )}
             </Link>
-
-            <Link
-              href="/flashcards"
+            {/* <Link
+              href="/wordsearch"
               className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-pink-200 cursor-pointer' 
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-4xl mb-4">✍️</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Flashcards</h2>
+              <div className="text-4xl mb-4">⏰👀</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">Activity #4</h2>
               <p className="text-gray-600 mb-4">
-                Practice spelling vocabulary words.
+                Stay tuned for more activities!
               </p>
               {!selectedWordList ? (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">
@@ -187,7 +177,34 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-center py-2 px-4 rounded-lg font-semibold">
-                  Start Spelling →
+                  Coming Soon →
+                </div>
+              )}
+            </Link> */}
+
+            <Link
+              href="/wordsearch"
+              className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
+                selectedWordList 
+                  ? 'hover:shadow-2xl hover:border-pink-200 cursor-pointer' 
+                  : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
+              }`}
+            >
+              <div className="text-4xl mb-4">🔍🔤</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">Wordsearch</h2>
+              <p className="text-gray-600 mb-4">
+                How many of the words can you find?
+              </p>
+              {!selectedWordList ? (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-red-600 text-sm font-medium flex items-center">
+                    <span className="mr-2">⚠</span>
+                    Please select a word list first
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-center py-2 px-4 rounded-lg font-semibold">
+                  Find Words →
                 </div>
               )}
             </Link>

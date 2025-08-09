@@ -6,10 +6,10 @@ import path from 'path';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { listName: string } }
+  { params }: { params: Promise<{ listName: string }> }
 ) {
   try {
-    const { listName } = params;
+    const { listName } = await params;
     
     // Construct the path to the JSON file
     // This assumes your JSON files are in the data folder at the project root
