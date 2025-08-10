@@ -21,11 +21,24 @@ export interface WordList {
  */
 export async function loadWordList(listName: string): Promise<WordList | null> {
   try {
-    // In Next.js, we need to fetch from the public API route or use dynamic imports
-    const response = await fetch(`/api/wordlists/${listName}`);
+    // Determine the correct URL based on environment
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+    
+    // In production (GitHub Pages), load from static wordlists folder
+    // In development (localhost), load from API
+    const url = isProduction 
+      ? `${basePath}/wordlists/${listName}.json`
+      : `/api/wordlists/${listName}`;
+    
+    console.log('Loading word list from:', url);
+    console.log('Base path:', basePath);
+    console.log('Is production:', isProduction);
+    
+    const response = await fetch(url);
     
     if (!response.ok) {
-      console.error(`Failed to load word list: ${listName}`);
+      console.error(`Failed to load word list: ${listName} (${response.status})`);
       return null;
     }
     
