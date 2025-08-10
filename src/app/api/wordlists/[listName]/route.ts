@@ -4,6 +4,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+export const dynamic = "force-static";
+export const revalidate = false;
+
+export async function generateStaticParams() {
+  const wordLists = [
+    'adjectives',
+    'animals-and-nature', 
+    'around-town',
+    'first-100-words',
+    'food-and-drink',
+    'friends-and-family',
+    'spiritual',
+    'verbs-1',
+    'verbs-2'
+  ];
+  
+  return wordLists.map((listName) => ({
+    listName,
+  }));
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ listName: string }> }

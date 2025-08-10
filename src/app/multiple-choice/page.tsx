@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useWordList } from '../WordListContext';
 import { useEffect, useState } from 'react';
-import { loadWordList, generateMultipleChoiceOptions, shuffleArray, WordItem, WordList } from '../utils/wordListLoader';
+import { loadWordList, generateMultipleChoiceOptions, shuffleArray, WordList } from '../utils/wordListLoader';
 
 interface Question {
   word: string;

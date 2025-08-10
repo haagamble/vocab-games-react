@@ -18,7 +18,7 @@ export default function ComingSoonPage() {
       setMessageIndex((prev) => (prev + 1) % messages.length);
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [messages.length]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 via-yellow-100 to-green-100 text-center px-4">

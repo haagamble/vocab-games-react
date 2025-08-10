@@ -95,7 +95,7 @@ export default function Flashcards() {
     setCurrentIndex(0);
     setIsFlipped(false);
     setCelebrated(false);
-  }, [selectedWordList]);
+  }, [selectedWordList, storageKey]);
 
   // Persist progress
   useEffect(() => {
@@ -218,7 +218,7 @@ export default function Flashcards() {
 
   const total = cards.length;
   const wrongCount = wrongIds.size;
-  const deckCount = deck.length;
+//   const deckCount = deck.length;
   const progress = total > 0 ? Math.round((rightIds.size / total) * 100) : 0;
 
   const allCorrect = total > 0 && wrongCount === 0 && cards.every((c) => c.correctCount > 0);
@@ -277,7 +277,7 @@ export default function Flashcards() {
         {/* Title */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Flashcards</h1>
-          <p className="text-white/80 text-lg">Flip the card, then mark if you were right or wrong. Practice your wrong list until it's empty.</p>
+          <p className="text-white/80 text-lg">Flip the card, then mark if you were right or wrong. Practice your wrong list until it is empty.</p>
         </div>
 
         {/* Card */}

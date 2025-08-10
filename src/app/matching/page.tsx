@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useWordList } from '../WordListContext';
 import { useEffect, useState } from 'react';
-import { loadWordList, shuffleArray, WordItem, WordList } from '../utils/wordListLoader';
+import { loadWordList, shuffleArray, WordList } from '../utils/wordListLoader';
 
 interface Card {
   id: string;

@@ -17,6 +17,16 @@ type Placement = {
   placedWord?: string; 
 };
 
+type ConfettiOptions = {
+  spread?: number;
+  startVelocity?: number;
+  decay?: number;
+  scalar?: number;
+  ticks?: number;
+  gravity?: number;
+  particleCount?: number;
+};
+
 // Fallback words if a list isn't selected/loaded
 const mockWords = [
   'КИТОБ', 'ДАРЁ', 'ОСМОН', 'ГУЛҲО', 'ШАҲР', 
@@ -85,7 +95,7 @@ export default function WordSearchPage() {
             setError(`Failed to load word list: ${selectedWordList}`);
           }
         }
-      } catch (e) {
+      } catch {
         if (!cancelled) setError('Error loading word list');
       } finally {
         if (!cancelled) setLoading(false);
@@ -382,44 +392,7 @@ export default function WordSearchPage() {
     return null;
   }
 
-  // Calculate line parameters for a found word
-  function getWordLine(placement: Placement) {
-    if (placement.coords.length === 0) return null;
-    
-    const coords = placement.coords;
-    
-    // Get actual DOM elements to measure their positions
-    const firstCoord = coords[0];
-    const lastCoord = coords[coords.length - 1];
-    
-    const firstCell = document.querySelector(`[data-cell="${firstCoord[0]},${firstCoord[1]}"]`);
-    const lastCell = document.querySelector(`[data-cell="${lastCoord[0]},${lastCoord[1]}"]`);
-    
-    if (!firstCell || !lastCell) return null;
-    
-    // Get the grid container to calculate relative positions
-    const gridContainer = firstCell.parentElement;
-    if (!gridContainer) return null;
-    
-    const gridRect = gridContainer.getBoundingClientRect();
-    const firstRect = firstCell.getBoundingClientRect();
-    const lastRect = lastCell.getBoundingClientRect();
-    
-    // Calculate center points of first and last cells
-    const firstCenterX = (firstRect.left - gridRect.left) + firstRect.width / 2;
-    const firstCenterY = (firstRect.top - gridRect.top) + firstRect.height / 2;
-    const lastCenterX = (lastRect.left - gridRect.left) + lastRect.width / 2;
-    const lastCenterY = (lastRect.top - gridRect.top) + lastRect.height / 2;
-    
-    return {
-      x1: firstCenterX,
-      y1: firstCenterY,
-      x2: lastCenterX,
-      y2: lastCenterY
-    };
-  }
-
-  // Calculate oriented rounded rectangle aligned with the word direction
+   // Calculate oriented rounded rectangle aligned with the word direction
   function getWordOrientedRect(placement: Placement) {
     if (placement.coords.length === 0) return null;
 
@@ -480,7 +453,7 @@ export default function WordSearchPage() {
   useEffect(() => {
     if (celebrated && words.length > 0 && foundWords.length === words.length) {
       const defaults = { ticks: 200, gravity: 1.0, spread: 70, scalar: 1 };
-      const shoot = (particleRatio: number, opts: any) => {
+      const shoot = (particleRatio: number, opts: ConfettiOptions) => {
         confetti(Object.assign({}, defaults, opts, {
           particleCount: Math.floor(400 * particleRatio),
         }));
