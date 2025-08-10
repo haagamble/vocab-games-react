@@ -29,7 +29,7 @@ export async function loadWordList(listName: string): Promise<WordList | null> {
     // In development (localhost), load from API
     const url = isProduction 
       ? `${basePath}/wordlists/${listName}.json`
-      : `/api/wordlists/${listName}`;
+      : `${basePath}/wordlists/${listName}.json`;
     
     console.log('Loading word list from:', url);
     console.log('Base path:', basePath);
