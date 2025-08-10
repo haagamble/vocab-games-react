@@ -46,7 +46,7 @@ export default function Home() {
               Welcome to Vocab Games
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl">
-              A collection of activities to help you learn and practice vocabulary.
+              Activities to help you learn and practice vocabulary.
             </p>
           </div>
           
@@ -97,7 +97,7 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white text-center py-2 px-4 rounded-lg font-semibold">
-                  Start Quiz →
+                  Take Quiz →
                 </div>
               )}
             </Link>            
