@@ -25,11 +25,8 @@ export async function loadWordList(listName: string): Promise<WordList | null> {
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
     const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
     
-    // In production (GitHub Pages), load from static wordlists folder
-    // In development (localhost), load from API
-    const url = isProduction 
-      ? `${basePath}/wordlists/${listName}.json`
-      : `${basePath}/wordlists/${listName}.json`;
+    // Always load from static wordlists folder (both production and development)
+    const url = `${basePath}/wordlists/${listName}.json`;
     
     console.log('Loading word list from:', url);
     console.log('Base path:', basePath);
