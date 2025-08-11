@@ -22,15 +22,12 @@ export interface WordList {
 export async function loadWordList(listName: string): Promise<WordList | null> {
   try {
     // Determine the correct URL based on environment
-    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-    const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
-    
-    // Always load from static wordlists folder (both production and development)
+    const basePath = process.env.NODE_ENV === 'production' ? '/vocab-games-react' : '';
     const url = `${basePath}/wordlists/${listName}.json`;
     
     console.log('Loading word list from:', url);
     console.log('Base path:', basePath);
-    console.log('Is production:', isProduction);
+    console.log('Environment:', process.env.NODE_ENV);
     
     const response = await fetch(url);
     
