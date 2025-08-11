@@ -549,9 +549,14 @@ export default function WordSearchPage() {
         <>
           <div
             className="grid gap-1 mx-auto mb-6 p-4 bg-white rounded-lg shadow-lg relative"
-            style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))` }}
+            style={{ 
+              gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
+              gap: '0.15rem',
+              touchAction: 'none'
+            }}
             onMouseUp={endSelection}
             onTouchEnd={endSelection}
+            onTouchMove={(e) => e.preventDefault()}
           >
             {grid.map((row, r) =>
               row.map((letter, c) => {
