@@ -1,1 +1,0 @@
-self.__SSG_MANIFEST=new Set(["\u002Fapi\u002Fwordlists\u002F[listName]"]);self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB()
