@@ -575,8 +575,8 @@ export default function WordSearchPage() {
       ) : (
         <>
           <div
-            className="grid gap-1 mx-auto mb-6 p-4 bg-white rounded-lg shadow-lg relative"
-            style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 2.8rem)` }}
+            className="grid mx-auto mb-6 p-2 sm:p-4 bg-white rounded-lg shadow-lg relative max-w-full"
+            style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`, gap: '0.15rem', touchAction: 'none' }}
             onMouseUp={endSelection}
             onTouchEnd={endSelection}
           >
@@ -594,8 +594,7 @@ export default function WordSearchPage() {
                     onTouchStart={() => startSelection(r, c)}
                     onTouchMove={handleTouchMove}
                     className={`
-                      h-10 w-10 flex items-center justify-center border rounded-lg
-                      select-none text-sm font-bold cursor-pointer transition-all duration-150
+                      aspect-square flex items-center justify-center border rounded-lg select-none font-bold cursor-pointer transition-all duration-150
                       ${foundWord 
                         ? 'bg-blue-50 text-blue-800' 
                         : isSelected 
@@ -604,6 +603,7 @@ export default function WordSearchPage() {
                       }
                     `}
                     style={{ 
+                      fontSize: 'clamp(0.75rem, 3vw, 1.25rem)',
                       userSelect: 'none', 
                       touchAction: 'none',
                       boxShadow: isSelected ? '0 0 10px rgba(255, 193, 7, 0.5)' : 'none'
