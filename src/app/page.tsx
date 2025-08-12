@@ -75,7 +75,7 @@ export default function Home() {
           </div>
 
           {/* Game Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full mt-4 sm:mt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6 w-full mt-4 sm:mt-8">
             {/* Multiple Choice */}
             <Link
               href="/multiple-choice"
@@ -88,7 +88,7 @@ export default function Home() {
               <div className="text-xl sm:text-4xl mb-1">🔠✅</div>
               <h2 className="text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Multiple Choice</h2>
               <p className="text-gray-600 mb-2 sm:mb-4">
-                Test your vocabulary with multiple choice questions.
+                Can you get 10/10?
               </p>
               {!selectedWordList ? (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">
@@ -142,7 +142,7 @@ export default function Home() {
               <div className="text-xl sm:text-4xl mb-1">🃏🔄 </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Flashcards</h2>
               <p className="text-gray-600 mb-2 sm:mb-4">
-                Study vocabulary with flashcards.
+                Flip and learn.
               </p>
               {!selectedWordList ? (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">
@@ -196,7 +196,7 @@ export default function Home() {
               <div className="text-xl sm:text-4xl mb-1">🔍🔤</div>
               <h2 className="text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Wordsearch</h2>
               <p className="text-gray-600 mb-2 sm:mb-4">
-                How many of the words can you find?
+                How many words can you find?
               </p>
               {!selectedWordList ? (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">

@@ -274,12 +274,12 @@ export default function MultipleChoice() {
         <div className="flex justify-between items-center mb-8">
           <Link 
             href="/" 
-            className="flex items-center text-white/90 hover:text-white font-semibold text-lg hover:underline transition-all duration-200"
+            className="flex items-center text-white/90 hover:text-white font-semibold text-base sm:text-lg hover:underline transition-all duration-200 py-1"
           >
             <span className="mr-2">←</span> Back to Home
           </Link>
           
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-8 gap-2">
             <button
               onClick={toggleMode}
               className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-white font-semibold hover:bg-white/30 transition-all duration-200 flex items-center gap-2"
@@ -288,7 +288,7 @@ export default function MultipleChoice() {
               {quizMode === 'tajik-to-english' ? 'Тоҷикӣ→English' : 'English→Тоҷикӣ'}
             </button>
             
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-white font-semibold">
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-sm sm:text-base text-white font-semibold">
               Question {currentQuestion + 1} of {questions.length}
             </div>
           </div>
@@ -306,18 +306,12 @@ export default function MultipleChoice() {
         <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-6">
           <div className="flex items-center mb-6">
             <div className="text-4xl mr-4">📝</div>
-            <h1 className="text-3xl font-bold text-gray-800">
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-800">
               Multiple Choice - {wordList?.name || selectedWordList}
             </h1>
           </div>
           
           <div className="mb-8">
-            <p className="text-xl text-gray-600 mb-4 font-medium">
-              {quizMode === 'english-to-tajik' 
-                ? 'What Tajik word matches this definition?' 
-                : 'What is the English meaning of this Tajik word?'
-              }
-            </p>
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-purple-500 p-6 rounded-xl">
               <p className="text-2xl font-semibold text-gray-800 leading-relaxed">
                 {quizMode === 'english-to-tajik' ? currentQ.definition : currentQ.word}
@@ -335,7 +329,7 @@ export default function MultipleChoice() {
                   key={index}
                   onClick={() => handleAnswerSelect(option)}
                   disabled={showResult}
-                  className={`w-full p-5 text-left rounded-xl border-2 font-medium text-lg transition-all duration-200 transform hover:scale-[1.02] ${
+                  className={`w-full p3 sm:p-5 text-left rounded-xl border-2 font-medium text-lg transition-all duration-200 transform hover:scale-[1.02] ${
                     showResult
                       ? option === correctAnswer
                         ? 'bg-green-100 border-green-400 text-green-800 shadow-lg scale-[1.02]'
