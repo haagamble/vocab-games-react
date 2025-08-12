@@ -37,9 +37,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-8">
-      <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8">
-        <main className="flex flex-col gap-4 sm:gap-8 items-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-4 sm:p-8">
+      <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-4 sm:p-8">
+        <main className="flex flex-col gap-3 sm:gap-6 items-center">
           {/* Header Section */}
           <div className="text-center">
             <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
@@ -52,28 +52,30 @@ export default function Home() {
           
           {/* Word List Selection Dropdown */}
           <div className="w-full max-w-md">
-            <label htmlFor="wordListSelect" className="block text-lg font-semibold text-gray-800 mb-2">
-              Choose a word list:
-            </label>
-            <div className="relative">
-              <select
-                id="wordListSelect"
-                value={selectedWordList || ''}
-                onChange={(e) => setSelectedWordList(e.target.value || null)}
-                className="w-full p-4 border-2 border-gray-200 rounded-xl shadow-md focus:ring-4 focus:ring-blue-200 focus:border-blue-500 bg-white text-gray-800 font-medium text-lg transition-all duration-200 hover:border-blue-300"
-              >
-                <option value="">Select a word list...</option>
-                {availableWordLists.map((list) => (
-                  <option key={list.filename} value={list.filename}>
-                    {list.display}
-                  </option>
-                ))}
-              </select>
+            <div className="mt-2 mb-4">
+              <label htmlFor="wordListSelect" className="block text-lg font-semibold text-gray-800 mb-2">
+                Choose a word list:
+              </label>
+              <div className="relative">
+                <select
+                  id="wordListSelect"
+                  value={selectedWordList || ''}
+                  onChange={(e) => setSelectedWordList(e.target.value || null)}
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl shadow-md focus:ring-4 focus:ring-blue-200 focus:border-blue-500 bg-white text-gray-800 font-medium text-lg transition-all duration-200 hover:border-blue-300"
+                >
+                  <option value="">Select a word list...</option>
+                  {availableWordLists.map((list) => (
+                    <option key={list.filename} value={list.filename}>
+                      {list.display}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
           {/* Game Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full mt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full mt-4 sm:mt-8">
             {/* Multiple Choice */}
             <Link
               href="/multiple-choice"
@@ -83,9 +85,9 @@ export default function Home() {
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-2xl sm:text-4xl mb-4">🔠✅</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Multiple Choice</h2>
-              <p className="text-gray-600 mb-4">
+              <div className="text-xl sm:text-4xl mb-2">🔠✅</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Multiple Choice</h2>
+              <p className="text-gray-600 mb-2 sm:mb-4">
                 Test your vocabulary with multiple choice questions.
               </p>
               {!selectedWordList ? (
@@ -110,9 +112,9 @@ export default function Home() {
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-2xl sm:text-4xl mb-4">🎴🎴</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Matching</h2>
-              <p className="text-gray-600 mb-4">
+              <div className="text-xl sm:text-4xl mb-2">🎴🎴</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Matching</h2>
+              <p className="text-gray-600 mb-2 sm:mb-4">
                 Match Tajik and English words.
               </p>
               {!selectedWordList ? (
@@ -137,9 +139,9 @@ export default function Home() {
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-2xl sm:text-4xl mb-4">🃏🔄 </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Flashcards</h2>
-              <p className="text-gray-600 mb-4">
+              <div className="text-xl sm:text-4xl mb-2">🃏🔄 </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Flashcards</h2>
+              <p className="text-gray-600 mb-2 sm:mb-4">
                 Study vocabulary with flashcards.
               </p>
               {!selectedWordList ? (
@@ -158,15 +160,15 @@ export default function Home() {
             {/* template for future activities */}
             {/* <Link
               href="/[put-link-here]"
-              className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
+              className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-pink-200 cursor-pointer' 
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-2xl sm:text-4xl mb-4">⏰👀</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Activity Name</h2>
-              <p className="text-gray-600 mb-4">
+              <div className="text-xl sm:text-4xl mb-2">⏰👀</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Activity Name</h2>
+              <p className="text-gray-600 mb-2 sm:mb-4">
                 Stay tuned for more activities!
               </p>
               {!selectedWordList ? (
@@ -191,9 +193,9 @@ export default function Home() {
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-2xl sm:text-4xl mb-4">🔍🔤</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">Wordsearch</h2>
-              <p className="text-gray-600 mb-4">
+              <div className="text-xl sm:text-4xl mb-2">🔍🔤</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Wordsearch</h2>
+              <p className="text-gray-600 mb-2 sm:mb-4">
                 How many of the words can you find?
               </p>
               {!selectedWordList ? (
