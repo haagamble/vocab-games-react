@@ -39,10 +39,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-8">
       <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8">
-        <main className="flex flex-col gap-8 items-center">
+        <main className="flex flex-col gap-4 sm:gap-8 items-center">
           {/* Header Section */}
           <div className="text-center">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+            <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
               Welcome to Vocab Games
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl">
@@ -52,7 +52,7 @@ export default function Home() {
           
           {/* Word List Selection Dropdown */}
           <div className="w-full max-w-md">
-            <label htmlFor="wordListSelect" className="block text-lg font-semibold text-gray-800 mb-3">
+            <label htmlFor="wordListSelect" className="block text-lg font-semibold text-gray-800 mb-2">
               Choose a word list:
             </label>
             <div className="relative">
@@ -73,17 +73,17 @@ export default function Home() {
           </div>
 
           {/* Game Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full mt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full mt-8">
             {/* Multiple Choice */}
             <Link
               href="/multiple-choice"
-              className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
+              className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-purple-200 cursor-pointer' 
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-4xl mb-4">🔠✅</div>
+              <div className="text-2xl sm:text-4xl mb-4">🔠✅</div>
               <h2 className="text-2xl font-bold text-gray-800 mb-3">Multiple Choice</h2>
               <p className="text-gray-600 mb-4">
                 Test your vocabulary with multiple choice questions.
@@ -104,13 +104,13 @@ export default function Home() {
             {/* Matching */}
             <Link
               href="/matching"
-              className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
+              className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-green-200 cursor-pointer' 
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-4xl mb-4">🎴🎴</div>
+              <div className="text-2xl sm:text-4xl mb-4">🎴🎴</div>
               <h2 className="text-2xl font-bold text-gray-800 mb-3">Matching</h2>
               <p className="text-gray-600 mb-4">
                 Match Tajik and English words.
@@ -131,13 +131,13 @@ export default function Home() {
             {/* Flashcards */}
             <Link
               href="/flashcards"
-              className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
+              className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-orange-200 cursor-pointer' 
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-4xl mb-4">🃏🔄 </div>
+              <div className="text-2xl sm:text-4xl mb-4">🃏🔄 </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-3">Flashcards</h2>
               <p className="text-gray-600 mb-4">
                 Study vocabulary with flashcards.
@@ -164,7 +164,7 @@ export default function Home() {
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-4xl mb-4">⏰👀</div>
+              <div className="text-2xl sm:text-4xl mb-4">⏰👀</div>
               <h2 className="text-2xl font-bold text-gray-800 mb-3">Activity Name</h2>
               <p className="text-gray-600 mb-4">
                 Stay tuned for more activities!
@@ -185,13 +185,13 @@ export default function Home() {
             {/* Wordsearch */}
             <Link
               href="/wordsearch"
-              className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 transform hover:-translate-y-2 ${
+              className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 selectedWordList 
                   ? 'hover:shadow-2xl hover:border-pink-200 cursor-pointer' 
                   : 'opacity-50 cursor-not-allowed pointer-events-none grayscale'
               }`}
             >
-              <div className="text-4xl mb-4">🔍🔤</div>
+              <div className="text-2xl sm:text-4xl mb-4">🔍🔤</div>
               <h2 className="text-2xl font-bold text-gray-800 mb-3">Wordsearch</h2>
               <p className="text-gray-600 mb-4">
                 How many of the words can you find?
