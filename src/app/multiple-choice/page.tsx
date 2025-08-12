@@ -285,11 +285,11 @@ export default function MultipleChoice() {
               className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-white font-semibold hover:bg-white/30 transition-all duration-200 flex items-center gap-2"
             >
               <span className="text-lg">🔄</span>
-              {quizMode === 'tajik-to-english' ? 'Тоҷикӣ→English' : 'English→Тоҷикӣ'}
+              {quizMode === 'tajik-to-english' ? 'TJ→EN' : 'EN→TJ'}
             </button>
             
             <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-sm sm:text-base text-white font-semibold">
-              Question {currentQuestion + 1} of {questions.length}
+              Q{currentQuestion + 1} of {questions.length}
             </div>
           </div>
         </div>
@@ -303,7 +303,9 @@ export default function MultipleChoice() {
         </div>
 
         {/* Question Card */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-6">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl 
+                px-6 py-3 sm:px-8 sm:py-4 
+                max-w-lg mx-auto mb-6">
           <div className="flex items-center mb-6">
             <div className="text-4xl mr-4">📝</div>
             <h1 className="text-xl sm:text-3xl font-bold text-gray-800">
