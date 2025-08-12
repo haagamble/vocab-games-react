@@ -276,26 +276,26 @@ export default function MultipleChoice() {
             href="/" 
             className="flex items-center text-white/90 hover:text-white font-semibold text-base sm:text-lg hover:underline transition-all duration-200 py-1"
           >
-            <span className="mr-2">←</span> Back to Home
+            <span className="mr-1 sm:mr-2">←</span> Back to Home
           </Link>
           
-          <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-8 gap-2">
+          <div className="flex justify-between items-center mb-4 sm:mb-8 gap-2 flex-nowrap sm:flex-wrap">
             <button
               onClick={toggleMode}
-              className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-white font-semibold hover:bg-white/30 transition-all duration-200 flex items-center gap-2"
+              className="bg-white/20 backdrop-blur-sm rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 text-white font-semibold hover:bg-white/30 transition-all duration-200 flex items-center gap-1 sm:gap-2"
             >
               <span className="text-lg">🔄</span>
               {quizMode === 'tajik-to-english' ? 'TJ→EN' : 'EN→TJ'}
             </button>
             
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-sm sm:text-base text-white font-semibold">
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base text-white font-semibold">
               Q{currentQuestion + 1} of {questions.length}
             </div>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-white/20 rounded-full h-4 mb-8 shadow-inner">
+        <div className="w-full bg-white/20 rounded-full h-4 mb-4 shadow-inner">
           <div 
             className="bg-gradient-to-r from-green-400 to-blue-500 h-4 rounded-full transition-all duration-500 shadow-lg"
             style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
@@ -314,8 +314,8 @@ export default function MultipleChoice() {
           </div>
           
           <div className="mb-8">
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-purple-500 p-6 rounded-xl">
-              <p className="text-2xl font-semibold text-gray-800 leading-relaxed">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-purple-500 px-3 py-2 sm:px-4 sm:py-3 rounded-xl">
+              <p className="text-xl sm:text-2xl font-semibold text-gray-800 leading-tight text-center">
                 {quizMode === 'english-to-tajik' ? currentQ.definition : currentQ.word}
               </p>
             </div>
@@ -331,7 +331,7 @@ export default function MultipleChoice() {
                   key={index}
                   onClick={() => handleAnswerSelect(option)}
                   disabled={showResult}
-                  className={`w-full p3 sm:p-5 text-left rounded-xl border-2 font-medium text-lg transition-all duration-200 transform hover:scale-[1.02] ${
+                  className={`w-full p-3 sm:p-5 text-left rounded-xl border-2 font-medium text-lg transition-all duration-200 transform hover:scale-[1.02] ${
                     showResult
                       ? option === correctAnswer
                         ? 'bg-green-100 border-green-400 text-green-800 shadow-lg scale-[1.02]'
