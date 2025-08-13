@@ -23,7 +23,9 @@ export default function Home() {
   // Load available word lists (mapping display names to file names)
   useEffect(() => {
     const wordLists: WordListOption[] = [
-      { display: 'Adjectives', filename: 'adjectives' },
+      { display: 'Adjectives: Level 1', filename: 'adjectives-1' },
+      { display: 'Adjectives: Level 2', filename: 'adjectives-2' },
+      { display: 'Adjectives: Level 3', filename: 'adjectives-3' },
       { display: 'Animals & Nature', filename: 'animals-and-nature' },
       { display: 'Around Town', filename: 'around-town' },
       { display: 'First 100 Words', filename: 'first-100-words' },

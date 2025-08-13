@@ -528,9 +528,9 @@ export default function WordSearchPage() {
             {running ? 'Pause' : 'Resume'}
           </button>
         </div>
-        <h2 className="text-lg sm:text-3xl md:text-4xl font-bold text-white mb-2">Word Search</h2>
+        
       </div>
-
+      <h2 className="text-lg sm:text-3xl md:text-4xl font-bold text-white mb-2">Word Search</h2>
       <div className="flex gap-6 items-center mb-2 bg-white rounded-lg p-3 shadow-sm">
         <div>
           <div className="text-sm text-gray-600">Time</div>
