@@ -283,17 +283,17 @@ export default function Flashcards() {
         {/* Card */}
         <div className="mb-3 sm:mb-6">
           <div className="relative mx-auto max-w-2xl">
-            <div onClick={flip} className="bg-white rounded-3xl shadow-2xl cursor-pointer transition-all duration-300 hover:shadow-3xl transform hover:-translate-y-1 min-h-[360px] flex flex-col">
-              <div className="p-4 border-b border-gray-100">
+            <div onClick={flip} className="bg-white rounded-3xl shadow-2xl cursor-pointer transition-all duration-300 hover:shadow-3xl transform hover:-translate-y-1 min-h-[200px] sm:min-h-[260px] md:min-h-[300px] flex flex-col">
+              <div className="p-3 border-b border-gray-100">
                 <div className="flex justify-between items-center">
-                  <div className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">{frontIsTajik ? 'Tajik → English' : 'English → Tajik'}</div>
+                  <div className="px-2 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">{frontIsTajik ? 'Tajik → English' : 'English → Tajik'}</div>
                   <div className="text-gray-500 text-sm">Wrong list: {wrongCount}</div>
                 </div>
               </div>
-              <div className="flex-1 flex items-center justify-center p-8">
+              <div className="flex-1 flex items-center justify-center py-4 px-6 sm:py-6 sm:px-8">
                 <div className="text-center">
                   <div className="text-2xl mb-4">{isFlipped ? '🔄' : '❓'}</div>
-                  <div className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
+                  <div className="text-3xl sm:text-4xl font-bold text-gray-800 mb-3">
                     {current
                       ? isFlipped
                         ? frontIsTajik
