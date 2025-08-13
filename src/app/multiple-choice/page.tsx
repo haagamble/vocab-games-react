@@ -352,20 +352,9 @@ export default function MultipleChoice() {
           </div>
 
           {/* Result & Next Button */}
+          {/* Only render this block if showResult is true. */}
           {showResult && (
-            <div className="text-center border-t pt-6">
-              <div className={`inline-flex items-center px-6 py-3 rounded-xl font-bold text-xl mb-6 ${
-                selectedAnswer === (quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition)
-                  ? 'bg-green-100 text-green-700 border border-green-300' 
-                  : 'bg-red-100 text-red-700 border border-red-300'
-              }`}>
-                <span className="mr-2">{selectedAnswer === (quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition) ? '🎉' : '😔'}</span>
-                {selectedAnswer === (quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition) 
-                  ? 'Correct!' 
-                  : `Incorrect. The answer was "${quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition}".`
-                }
-              </div>
-              <br />
+            <div className="text-center border-t pt-6">             
               <button
                 onClick={nextQuestion}
                 className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 text-lg"
