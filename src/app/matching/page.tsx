@@ -334,10 +334,10 @@ export default function MatchingGame() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-4 sm:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-2 sm:p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2">
           <Link 
             href="/" 
             className="flex items-center text-white/90 hover:text-white font-semibold text-base sm:text-lg hover:underline transition-all duration-200"
@@ -345,7 +345,7 @@ export default function MatchingGame() {
             <span className="mr-2">←</span> Back to Home
           </Link>
           
-          <div className="flex items-center gap-4">
+          
             <button
               onClick={toggleDifficulty}
               className="bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl px-3 py-2 sm:px-4 sm:py-2 text-white font-semibold hover:bg-white/30 transition-all duration-200 flex items-center gap-2 text-sm sm:text-base"
@@ -358,15 +358,15 @@ export default function MatchingGame() {
                 {difficulty === 'easy' ? 'Easy' : 'Hard'}
               </span>
             </button>
-          </div>
+         
         </div>
 
         {/* Game Info */}
-        <div className="text-center mb-4 sm:mb-6">
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-6 inline-block">
+        <div className="text-center mb-2 sm:mb-4">
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg p-1 sm:p-3 inline-block">
             <div className="flex items-center justify-center gap-4 sm:gap-8">
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-gray-800">{matchedPairs.length}</div>
+                <div className="text-lg sm:text-3xl font-bold text-gray-800">{matchedPairs.length}</div>
                 <div className="text-xs sm:text-sm text-gray-600">Pairs Found</div>
               </div>
               <div className="text-2xl sm:text-4xl">🃏</div>
@@ -384,27 +384,24 @@ export default function MatchingGame() {
         </div>
 
         {/* Game Title */}
-        <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
+        <div className="text-center mb-2 sm:mb-4">
+          <h1 className="text-lg sm:text-3xl md:text-4xl font-bold text-white mb-2">
             Memory Matching Game
           </h1>
-          <p className="text-white/80 text-sm sm:text-base md:text-lg px-4">
-            Match Tajik words with their English translations!
-          </p>
         </div>
 
         {/* Game Board */}
         <div className={`grid gap-1 sm:gap-2 justify-center max-w-full ${
           difficulty === 'easy' 
-            ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4' 
-            : 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-5'
+            ? 'grid-cols-3 sm:grid-cols-3 lg:grid-cols-4' 
+            : 'grid-cols-3 sm:grid-cols-4 lg:grid-cols-5'
         }`}>
           {cards.map((card) => (
             <div
               key={card.id}
               onClick={() => handleCardClick(card.id)}
               className={`
-                relative w-full aspect-[3/2] cursor-pointer transition-all duration-300 transform hover:scale-[1.02] max-w-44 sm:max-w-48 md:max-w-52
+                relative w-full aspect-[4/3] cursor-pointer transition-all duration-300 transform hover:scale-[1.02] max-w-44 sm:max-w-48 md:max-w-52
                 ${card.isMatched ? 'opacity-75' : ''}
                 ${isProcessing && flippedCards.includes(card.id) ? 'pointer-events-none' : ''}
               `}
@@ -437,14 +434,7 @@ export default function MatchingGame() {
           ))}
         </div>
 
-        {/* Instructions */}
-        <div className="text-center mt-8">
-          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 inline-block">
-            <p className="text-white text-sm">
-              Click two cards to flip them. Match Tajik words with their English translations!
-            </p>
-          </div>
-        </div>
+
       </div>
     </div>
   );

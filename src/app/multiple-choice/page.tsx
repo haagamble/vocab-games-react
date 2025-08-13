@@ -305,7 +305,7 @@ export default function MultipleChoice() {
         {/* Question Card */}
         <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl 
                 px-6 py-3 sm:px-8 sm:py-3 
-                max-w-lg mx-auto mb-6">
+                max-w-lg mx-auto mb-4">
           <div className="flex items-center mb-3">
             <div className="text-4xl mr-4">🔠</div>
             <h1 className="text-xl sm:text-3xl font-bold text-gray-800">
@@ -313,7 +313,7 @@ export default function MultipleChoice() {
             </h1>
           </div>
           
-          <div className="mb-6">
+          <div className="mb-4">
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-purple-500 px-3 py-2 sm:px-4 sm:py-3 rounded-xl">
               <p className="text-xl sm:text-2xl font-semibold text-gray-800 leading-tight text-center">
                 {quizMode === 'english-to-tajik' ? currentQ.definition : currentQ.word}
