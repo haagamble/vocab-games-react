@@ -268,7 +268,7 @@ export default function MultipleChoice() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-4 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-2 sm:p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-2 sm:mb-4">
@@ -279,7 +279,7 @@ export default function MultipleChoice() {
             <span className="mr-1 sm:mr-2">←</span> Back to Home
           </Link>
           
-          <div className="flex justify-between items-center mb-4 sm:mb-8 gap-2 flex-nowrap sm:flex-wrap">
+          <div className="flex justify-between items-center mb-4 sm:mb-6 gap-2 flex-nowrap sm:flex-wrap">
             <button
               onClick={toggleMode}
               className="bg-white/20 backdrop-blur-sm rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 text-white font-semibold hover:bg-white/30 transition-all duration-200 flex items-center gap-1 sm:gap-2 text-base sm:text-lg"
@@ -304,16 +304,16 @@ export default function MultipleChoice() {
 
         {/* Question Card */}
         <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl 
-                px-6 py-3 sm:px-8 sm:py-4 
+                px-6 py-3 sm:px-8 sm:py-3 
                 max-w-lg mx-auto mb-6">
-          <div className="flex items-center mb-6">
+          <div className="flex items-center mb-3">
             <div className="text-4xl mr-4">🔠</div>
             <h1 className="text-xl sm:text-3xl font-bold text-gray-800">
               {wordList?.name || selectedWordList}
             </h1>
           </div>
           
-          <div className="mb-8">
+          <div className="mb-6">
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-purple-500 px-3 py-2 sm:px-4 sm:py-3 rounded-xl">
               <p className="text-xl sm:text-2xl font-semibold text-gray-800 leading-tight text-center">
                 {quizMode === 'english-to-tajik' ? currentQ.definition : currentQ.word}
@@ -322,7 +322,7 @@ export default function MultipleChoice() {
           </div>
 
           {/* Answer Options */}
-          <div className="grid gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="grid gap-3 sm:gap-4 mb-3 sm:mb-4">
             {currentQ.options.map((option, index) => {
               const correctAnswer = quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition;
               
@@ -354,10 +354,10 @@ export default function MultipleChoice() {
           {/* Result & Next Button */}
           {/* Only render this block if showResult is true. */}
           {showResult && (
-            <div className="text-center border-t pt-6">             
+            <div className="text-center border-t pt-3">             
               <button
                 onClick={nextQuestion}
-                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 text-lg"
+                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 text-lg"
               >
                 {currentQuestion < questions.length - 1 ? '➡️ Next Question' : '🏁 Finish Game'}
               </button>
