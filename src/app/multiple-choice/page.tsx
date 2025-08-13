@@ -268,10 +268,10 @@ export default function MultipleChoice() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-4 sm:p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-2 sm:mb-4">
           <Link 
             href="/" 
             className="flex items-center text-white/90 hover:text-white font-semibold text-base sm:text-lg hover:underline transition-all duration-200 py-1"
@@ -282,13 +282,13 @@ export default function MultipleChoice() {
           <div className="flex justify-between items-center mb-4 sm:mb-8 gap-2 flex-nowrap sm:flex-wrap">
             <button
               onClick={toggleMode}
-              className="bg-white/20 backdrop-blur-sm rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 text-white font-semibold hover:bg-white/30 transition-all duration-200 flex items-center gap-1 sm:gap-2"
+              className="bg-white/20 backdrop-blur-sm rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 text-white font-semibold hover:bg-white/30 transition-all duration-200 flex items-center gap-1 sm:gap-2 text-base sm:text-lg"
             >
               <span className="text-lg">🔄</span>
               {quizMode === 'tajik-to-english' ? 'TJ→EN' : 'EN→TJ'}
             </button>
             
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base text-white font-semibold">
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 text-white font-semibold flex items-center text-base sm:text-lg">
               Q{currentQuestion + 1} of {questions.length}
             </div>
           </div>
@@ -307,9 +307,9 @@ export default function MultipleChoice() {
                 px-6 py-3 sm:px-8 sm:py-4 
                 max-w-lg mx-auto mb-6">
           <div className="flex items-center mb-6">
-            <div className="text-4xl mr-4">📝</div>
+            <div className="text-4xl mr-4">🔠</div>
             <h1 className="text-xl sm:text-3xl font-bold text-gray-800">
-              Multiple Choice - {wordList?.name || selectedWordList}
+              {wordList?.name || selectedWordList}
             </h1>
           </div>
           
@@ -322,7 +322,7 @@ export default function MultipleChoice() {
           </div>
 
           {/* Answer Options */}
-          <div className="grid gap-4 mb-8">
+          <div className="grid gap-3 sm:gap-4 mb-4 sm:mb-6">
             {currentQ.options.map((option, index) => {
               const correctAnswer = quizMode === 'english-to-tajik' ? currentQ.word : currentQ.definition;
               
