@@ -401,7 +401,7 @@ export default function MatchingGame() {
               key={card.id}
               onClick={() => handleCardClick(card.id)}
               className={`
-                relative w-full aspect-[4/3] cursor-pointer transition-all duration-300 transform hover:scale-[1.02] max-w-44 sm:max-w-48 md:max-w-52
+                relative w-full aspect-[3/2] cursor-pointer transition-all duration-300 transform hover:scale-[1.02] max-w-44 sm:max-w-48 md:max-w-52
                 ${card.isMatched ? 'opacity-75' : ''}
                 ${isProcessing && flippedCards.includes(card.id) ? 'pointer-events-none' : ''}
               `}

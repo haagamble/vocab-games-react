@@ -505,10 +505,16 @@ export default function WordSearchPage() {
   }
 
   return (
-    <div className="p-4 max-w-screen-sm mx-auto bg-gradient-to-b from-blue-50 to-indigo-100 min-h-screen">
+    <div className="p-2 max-w-screen-sm mx-auto bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 min-h-screen">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-indigo-800">Word Search</h2>
+        
         <div className="flex gap-2">
+        <Link 
+            href="/" 
+            className="flex items-center text-white/90 hover:text-white font-semibold text-base sm:text-lg hover:underline transition-all duration-200"
+          >
+            <span className="mr-2">←</span> Back to Home
+          </Link>
           <button
             onClick={initializePuzzle}
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
@@ -522,18 +528,19 @@ export default function WordSearchPage() {
             {running ? 'Pause' : 'Resume'}
           </button>
         </div>
+        <h2 className="text-lg sm:text-3xl md:text-4xl font-bold text-white mb-2">Word Search</h2>
       </div>
 
-      <div className="flex gap-6 items-center mb-4 bg-white rounded-lg p-3 shadow-sm">
+      <div className="flex gap-6 items-center mb-2 bg-white rounded-lg p-3 shadow-sm">
         <div>
           <div className="text-sm text-gray-600">Time</div>
           <div className="font-mono text-lg font-bold text-gray-800">{formatTime(seconds)}</div>
         </div>
         <div>
           <div className="text-sm text-gray-600">Best</div>
-          <div className="font-mono text-lg font-bold text-gray-800">
+          {/* <div className="font-mono text-lg font-bold text-gray-800">
             {bestTime === null ? '--:--' : formatTime(bestTime)}
-          </div>
+          </div> */}
         </div>
         <div>
           <div className="text-sm text-gray-600">Progress</div>
@@ -552,7 +559,8 @@ export default function WordSearchPage() {
             style={{ 
               gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
               gap: '0.15rem',
-              touchAction: 'none'
+              touchAction: 'none',
+              maxWidth: '500px', 
             }}
             onMouseUp={endSelection}
             onTouchEnd={endSelection}
@@ -628,8 +636,8 @@ export default function WordSearchPage() {
             </svg>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <h3 className="font-bold text-lg mb-3 text-gray-800">Find these words:</h3>
+          <div className="bg-white rounded-lg p-2 sm:p-4 shadow-sm">
+            <h3 className="font-bold text-lg mb-1 sm:mb-3 text-gray-800">Find these words:</h3>
             <div className="flex flex-wrap gap-2">
               {words.map((w) => {
                 const isFound = foundWords.includes(w);
@@ -642,7 +650,7 @@ export default function WordSearchPage() {
                   <div 
                     key={w} 
                     className={`
-                      px-3 py-2 border-2 rounded-lg font-medium transition-all duration-300 relative
+                      px-2 py-1 border-2 rounded-lg font-medium transition-all duration-300 relative
                       ${isFound 
                         ? 'bg-blue-50 text-blue-800' 
                         : 'bg-gray-50 border-gray-200 text-gray-700'

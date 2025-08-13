@@ -245,9 +245,9 @@ export default function Flashcards() {
         </div>
 
         {/* Controls */}
-        <div className="mb-8">
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg p-4">
-            <div className="flex flex-wrap justify-center gap-4 mb-4">
+        <div className="mb-2">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg p-2">
+            <div className="flex flex-wrap justify-center gap-4 mb-2 sm:mb-4">
               <select
                 value={studyMode}
                 onChange={(e) => { setStudyMode(e.target.value as StudyMode); setIsFlipped(false); }}
@@ -275,24 +275,24 @@ export default function Flashcards() {
         </div>
 
         {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Flashcards</h1>
-          <p className="text-white/80 text-lg">Flip the card, then mark if you were right or wrong. Practice your wrong list until it is empty.</p>
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-lg sm:text-3xl md:text-4xl font-bold text-white mb-2">Flashcards</h1>
+          <p className="text-white/80 text-lg">Flip card, then mark if you were right or wrong. Practice wrong list until it is empty.</p>
         </div>
 
         {/* Card */}
-        <div className="mb-8">
+        <div className="mb-3 sm:mb-6">
           <div className="relative mx-auto max-w-2xl">
             <div onClick={flip} className="bg-white rounded-3xl shadow-2xl cursor-pointer transition-all duration-300 hover:shadow-3xl transform hover:-translate-y-1 min-h-[360px] flex flex-col">
-              <div className="p-6 border-b border-gray-100">
+              <div className="p-4 border-b border-gray-100">
                 <div className="flex justify-between items-center">
-                  <div className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">{frontIsTajik ? 'Тоҷикӣ → English' : 'English → Тоҷикӣ'}</div>
+                  <div className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">{frontIsTajik ? 'Tajik → English' : 'English → Tajik'}</div>
                   <div className="text-gray-500 text-sm">Wrong list: {wrongCount}</div>
                 </div>
               </div>
               <div className="flex-1 flex items-center justify-center p-8">
                 <div className="text-center">
-                  <div className="text-6xl mb-6">{isFlipped ? '🔄' : '❓'}</div>
+                  <div className="text-2xl mb-4">{isFlipped ? '🔄' : '❓'}</div>
                   <div className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
                     {current
                       ? isFlipped
@@ -304,9 +304,9 @@ export default function Flashcards() {
                           : current.definition
                       : 'No cards'}
                   </div>
-                  <div className="text-lg text-gray-500 mb-6">
+                  {/* <div className="text-lg text-gray-500 mb-6">
                     {isFlipped ? (frontIsTajik ? 'English' : 'Tajik') : (frontIsTajik ? 'Tajik' : 'English')}
-                  </div>
+                  </div> */}
                   {!isFlipped && <div className="text-gray-400 text-sm">Click to reveal answer</div>}
                 </div>
               </div>
