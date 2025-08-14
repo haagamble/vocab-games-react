@@ -337,7 +337,7 @@ export default function MatchingGame() {
     <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-2 sm:p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2">
+        <div className="flex sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2">
           <Link 
             href="/" 
             className="flex items-center text-white/90 hover:text-white font-semibold text-base sm:text-lg hover:underline transition-all duration-200"

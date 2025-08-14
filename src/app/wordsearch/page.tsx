@@ -536,12 +536,12 @@ export default function WordSearchPage() {
           <div className="text-sm text-gray-600">Time</div>
           <div className="font-mono text-lg font-bold text-gray-800">{formatTime(seconds)}</div>
         </div>
-        <div>
+        {/* <div>
           <div className="text-sm text-gray-600">Best</div>
-          {/* <div className="font-mono text-lg font-bold text-gray-800">
+          <div className="font-mono text-lg font-bold text-gray-800">
             {bestTime === null ? '--:--' : formatTime(bestTime)}
-          </div> */}
-        </div>
+          </div>
+        </div> */}
         <div>
           <div className="text-sm text-gray-600">Progress</div>
           <div className="font-bold text-lg text-gray-800">{foundWords.length}/{words.length}</div>

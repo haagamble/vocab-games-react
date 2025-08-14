@@ -308,9 +308,9 @@ export default function MultipleChoice() {
                 max-w-lg mx-auto mb-4">
           <div className="flex items-center mb-3">
             <div className="text-4xl mr-4">🔠</div>
-            <h1 className="text-xl sm:text-3xl font-bold text-gray-800">
+            {/* <h1 className="text-xl sm:text-3xl font-bold text-gray-800">
               {wordList?.name || selectedWordList}
-            </h1 >
+            </h1 > */}
             <h1 className="text-xl sm:text-3xl font-bold text-gray-800">Multiple Choice</h1>
           </div>
           
